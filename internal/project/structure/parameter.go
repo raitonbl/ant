@@ -8,14 +8,14 @@ const (
 )
 
 type Parameter struct {
-	Id           string  `yaml:"id"`
-	In           *In     `yaml:"in"`
-	Index        *int    `yaml:"index"`
-	Required     *bool   `yaml:"required"`
-	Name         *string `yaml:"name"`
-	ShortForm   *string `yaml:"short-form"`
-	Description  *string `yaml:"description"`
-	RefersTo     *string `yaml:"refers-to"`
-	DefaultValue *string `yaml:"default"`
-	Schema       *Schema `yaml:"schema"`
+	Id           string  `yaml:"id" json:"id,omitempty"`
+	In           *In     `yaml:"in" json:"in,omitempty"`
+	Index        *int    `yaml:"index" json:"index,omitempty"`
+	Required     *bool   `yaml:"required" json:"required,omitempty"`
+	Name         *string `yaml:"name" json:"name,omitempty"`
+	ShortForm   *string `yaml:"short-form" json:"short-form,omitempty"`
+	Description  *string `yaml:"description" json:"description,omitempty"`
+	RefersTo     *string `yaml:"refers-to" json:"refers-to,omitempty"`
+	DefaultValue *string `yaml:"default" json:"default,omitempty"`
+	Schema       *Schema `yaml:"schema" json:"schema,omitempty"`
 }

@@ -1,21 +1,21 @@
 package structure
 
 type Schema struct {
-	MultipleOf       *int          `yaml:"multiple-of"`
-	Maximum          *int          `yaml:"maximum"`
-	Minimum          *int          `yaml:"minimum"`
-	MaxLength        *int          `yaml:"max-length"`
-	MinLength        *int          `yaml:"min-length"`
-	ExclusiveMinimum *bool         `yaml:"exclusive-minimum"`
-	ExclusiveMaximum *bool         `yaml:"exclusive-maximum"`
-	MaxItems         *int          `yaml:"max-items"`
-	MinItems         *int          `yaml:"min-items"`
-	UniqueItems      *bool         `yaml:"unique-items"`
-	Enum             []string      `yaml:"enum"`
-	Pattern          *string       `yaml:"pattern"`
-	Examples         *string       `yaml:"examples"`
-	TypeOf           *SchemaType   `yaml:"type"`
-	Format           *SchemaFormat `yaml:"format"`
+	MultipleOf       *int          `yaml:"multiple-of" json:"multiple-of,omitempty"`
+	Maximum          *int          `yaml:"maximum" json:"maximum,omitempty"`
+	Minimum          *int          `yaml:"minimum" json:"minimum,omitempty"`
+	MaxLength        *int          `yaml:"max-length" json:"max-length,omitempty"`
+	MinLength        *int          `yaml:"min-length" json:"min-length,omitempty"`
+	ExclusiveMinimum *bool         `yaml:"exclusive-minimum" json:"exclusive-minimum,omitempty"`
+	ExclusiveMaximum *bool         `yaml:"exclusive-maximum" json:"exclusive-maximum,omitempty"`
+	MaxItems         *int          `yaml:"max-items" json:"max-items,omitempty"`
+	MinItems         *int          `yaml:"min-items" json:"min-items,omitempty"`
+	UniqueItems      *bool         `yaml:"unique-items" json:"unique-items,omitempty"`
+	Enum             []string      `yaml:"enum" json:"enum,omitempty"`
+	Pattern          *string       `yaml:"pattern" json:"pattern,omitempty"`
+	Examples         []string      `yaml:"examples" json:"examples,omitempty"`
+	TypeOf           *SchemaType   `yaml:"type" json:"type,omitempty"`
+	Format           *SchemaFormat `yaml:"format" json:"format,omitempty"`
 }
 
 type SchemaType string

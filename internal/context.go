@@ -1,13 +1,13 @@
 package internal
 
 type ProjectContext interface {
-	GetDescriptor() string
+	GetProjectFile() *File
 }
 
 type DefaultContext struct {
-	Descriptor string
+	ProjectFile *File
 }
 
-func (instance *DefaultContext) GetDescriptor() string {
-	return instance.Descriptor
+func (instance *DefaultContext) GetProjectFile() *File {
+	return instance.ProjectFile
 }

@@ -8,7 +8,9 @@ import (
 )
 
 func TestLoad(t *testing.T) {
-	rv, err := Load(&internal.DefaultContext{Descriptor: "../../testdata/load/descriptor.yaml"})
+	file, _ := internal.GetFile("../../testdata/load/descriptor.yaml")
+
+	rv, err := Load(&internal.DefaultContext{ProjectFile: file})
 
 	if err != nil {
 		t.Fatal(err)
@@ -19,7 +21,6 @@ func TestLoad(t *testing.T) {
 	}
 
 	binary, _ := json.Marshal(rv)
-
 
 	fmt.Println(string(binary))
 }

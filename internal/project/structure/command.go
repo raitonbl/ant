@@ -1,9 +1,10 @@
 package structure
 
 type Command struct {
-	Name        *string     `yaml:"name"`
-	Description *string     `yaml:"description"`
-	Subcommands []Command   `yaml:"commands"`
-	Parameters  []Parameter `yaml:"parameters"`
-	Exit        []Exit      `yaml:"exit"`
+	Id          *string     `yaml:"id" json:"multiple-of"`
+	Name        *string     `yaml:"name" json:"name"`
+	Description *string     `yaml:"description" json:"description"`
+	Subcommands []Command   `yaml:"commands" json:"commands"`
+	Parameters  []Parameter `yaml:"parameters" json:"parameters"`
+	Exit        []Exit      `yaml:"exit" json:"exit"`
 }

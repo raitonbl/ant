@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "commands": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/command" }
+    },
+    "description": {
+      "type": "string"
+    },
+    "parameters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/parameter" }
+    },
+    "exit": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/exit" }
+    }
+  },
+  "required": [
+    "name",
+    "version",
+    "commands",
+    "description"
+  ],
+  "$defs": {
+    "parameter": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "refers-to": {
+          "type": "string"
+        },
+        "short-form": {
+          "type": "string"
+        },
+        "in": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "default": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "multiple-of": {
+              "type": "number"
+            },
+            "maximum": {
+              "type": "integer"
+            },
+            "minimum": {
+              "type": "integer"
+            },
+            "max-length": {
+              "type": "integer"
+            },
+            "min-length": {
+              "type": "integer"
+            },
+            "exclusive-minimum": {
+              "type": "integer"
+            },
+            "exclusive-maximum": {
+              "type": "integer"
+            },
+            "max-items": {
+              "type": "integer"
+            },
+            "min-items": {
+              "type": "integer"
+            },
+            "unique-items": {
+              "type": "integer"
+            },
+            "enum": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "pattern": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "examples": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            },
+            "format": {
+              "type": "string",
+              "enum": [
+                "",
+                "byte",
+                "date",
+                "int64",
+                "int32",
+                "float",
+                "double",
+                "binary",
+                "datetime",
+                "pattern"
+              ]
+            }
+          },
+          "required": [
+            "type"
+          ]
+        }
+      }
+    },
+    "exit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "refers-to": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "command": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "exit": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/exit" }
+        },
+        "commands": {
+          "type": "array",
+          "items":  { "$ref": "#/$defs/command" }
+        }
+      }
+    }
+  }
+}
