@@ -61,82 +61,7 @@
         "default": {
           "type": "string"
         },
-        "schema": {
-          "type": "object",
-          "properties": {
-            "multiple-of": {
-              "type": "number"
-            },
-            "maximum": {
-              "type": "integer"
-            },
-            "minimum": {
-              "type": "integer"
-            },
-            "max-length": {
-              "type": "integer"
-            },
-            "min-length": {
-              "type": "integer"
-            },
-            "exclusive-minimum": {
-              "type": "integer"
-            },
-            "exclusive-maximum": {
-              "type": "integer"
-            },
-            "max-items": {
-              "type": "integer"
-            },
-            "min-items": {
-              "type": "integer"
-            },
-            "unique-items": {
-              "type": "integer"
-            },
-            "enum": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "pattern": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "examples": {
-              "type": "string"
-            },
-            "type": {
-              "type": "string",
-              "enum": [
-                "string",
-                "number",
-                "boolean"
-              ]
-            },
-            "format": {
-              "type": "string",
-              "enum": [
-                "",
-                "byte",
-                "date",
-                "int64",
-                "int32",
-                "float",
-                "double",
-                "binary",
-                "datetime",
-                "pattern"
-              ]
-            }
-          },
-          "required": [
-            "type"
-          ]
-        }
+        "schema": { "$ref": "#/$defs/schema"  }
       }
     },
     "exit": {
@@ -152,6 +77,9 @@
           "type": "integer"
         },
         "message": {
+          "type": "string"
+        },
+        "description": {
           "type": "string"
         }
       }
@@ -183,6 +111,86 @@
           "items":  { "$ref": "#/$defs/command" }
         }
       }
+    },
+    "schema": {
+      "type": "object",
+      "properties": {
+        "multiple-of": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "integer"
+        },
+        "minimum": {
+          "type": "integer"
+        },
+        "max-length": {
+          "type": "integer"
+        },
+        "min-length": {
+          "type": "integer"
+        },
+        "exclusive-minimum": {
+          "type": "integer"
+        },
+        "exclusive-maximum": {
+          "type": "integer"
+        },
+        "max-items": {
+          "type": "integer"
+        },
+        "min-items": {
+          "type": "integer"
+        },
+        "unique-items": {
+          "type": "integer"
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pattern": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "examples": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "array"
+          ]
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "",
+            "byte",
+            "date",
+            "int64",
+            "int32",
+            "float",
+            "double",
+            "binary",
+            "datetime",
+            "pattern"
+          ]
+        },
+        "items": {
+          "type": { "$ref": "#/$defs/schema"  }
+        }
+      },
+      "required": [
+        "type"
+      ]
     }
   }
 }

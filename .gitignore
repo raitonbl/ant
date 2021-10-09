@@ -312,5 +312,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
+sonar-project.properties
+bin/
+.scripts/
+.scannerwork/
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,intellij+all,intellij,intellij+iml,go

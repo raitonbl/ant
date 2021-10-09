@@ -18,7 +18,7 @@ func (instance *JsonSchemaLinter) CanLint(ctx internal.ProjectContext, when Mome
 	return ctx != nil && strings.HasSuffix(ctx.GetProjectFile().GetName(), ".json") && when == Binary
 }
 
-func (instance *JsonSchemaLinter) Lint(ctx internal.ProjectContext, document *structure.Cli, when Moment) ([]Violation, error) {
+func (instance *JsonSchemaLinter) Lint(ctx internal.ProjectContext, document *structure.Specification, when Moment) ([]Violation, error) {
 	goContext := context.Background()
 
 	if instance.schema == nil {

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Load(context internal.ProjectContext) (*structure.Cli, error) {
+func Load(context internal.ProjectContext) (*structure.Specification, error) {
 
 	if context == nil {
 		return nil, internal.GetProblemFactory().GetUnexpectedContext()
@@ -33,13 +33,13 @@ func Load(context internal.ProjectContext) (*structure.Cli, error) {
 	return parseYaml(binary)
 }
 
-func parseYaml(binary []byte) (*structure.Cli, error) {
+func parseYaml(binary []byte) (*structure.Specification, error) {
 
 	if binary == nil {
 		return nil, internal.GetProblemFactory().GetUnexpectedContext()
 	}
 
-	descriptor := structure.Cli{}
+	descriptor := structure.Specification{}
 	err := yaml.Unmarshal(binary, &descriptor)
 
 	if err != nil {
@@ -49,13 +49,13 @@ func parseYaml(binary []byte) (*structure.Cli, error) {
 	return &descriptor, err
 }
 
-func parseJson(binary []byte) (*structure.Cli, error) {
+func parseJson(binary []byte) (*structure.Specification, error) {
 
 	if binary == nil {
 		return nil, internal.GetProblemFactory().GetUnexpectedContext()
 	}
 
-	descriptor := structure.Cli{}
+	descriptor := structure.Specification{}
 	err := json.Unmarshal(binary, &descriptor)
 
 	if err != nil {

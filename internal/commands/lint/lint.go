@@ -1,6 +1,9 @@
 package lint
 
-import "github.com/raitonbl/cli/internal"
+import (
+	"github.com/raitonbl/cli/internal"
+	"github.com/raitonbl/cli/internal/project/structure"
+)
 
 var Builder LinterBuilder
 
@@ -26,7 +29,7 @@ func Lint(context internal.ProjectContext) ([]Violation, error) {
 		return nil, err
 	}
 
-	problems, err := lint(context, object, Binary)
+	problems, err := lint(context, object, nil, Binary)
 
 	if err != nil {
 		return nil, err
@@ -36,7 +39,13 @@ func Lint(context internal.ProjectContext) ([]Violation, error) {
 		return problems, nil
 	}
 
-	return lint(context, object, Document)
+	document, err := context.GetDocument()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return lint(context, object, document, Document)
 }
 
 func getLinter() LinterBuilder {
@@ -44,11 +53,11 @@ func getLinter() LinterBuilder {
 	return builder.Append(&JsonSchemaLinter{})
 }
 
-func lint(context internal.ProjectContext, object Linter, when Moment) ([]Violation, error) {
+func lint(context internal.ProjectContext, object Linter, document *structure.Specification, when Moment) ([]Violation, error) {
 	problems := make([]Violation, 0)
 
 	if object.CanLint(context, when) {
-		array, prob := object.Lint(context, nil, when)
+		array, prob := object.Lint(context, document, when)
 
 		if prob != nil {
 			return nil, prob

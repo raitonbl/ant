@@ -11,9 +11,9 @@
         }
       ],
       "exit": [
-        {},
         {
-          "code": 1
+          "code": 1,
+          "message": "Unexpected behaviour"
         },
         {
           "refers-to": "file-not-found"
@@ -76,11 +76,26 @@
         ],
         "type": "string"
       }
+    },
+    {
+      "id": "parameter0",
+      "in": "flags",
+      "name": "stack",
+      "description": "indicates the programming language which is used to generate the project",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "min-items": -1
+      }
     }
   ],
   "exit": [
     {
-      "id": "file-not-found"
+      "code": 2,
+      "id": "file-not-found",
+      "message": "Input file not found"
     }
   ]
 }

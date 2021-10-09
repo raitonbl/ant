@@ -12,7 +12,8 @@
       ],
       "exit": [
         {
-          "code": "A"
+          "code": 1,
+          "message": "Unexpected behaviour"
         },
         {
           "refers-to": "file-not-found"
@@ -59,7 +60,8 @@
       "name": "filename",
       "description": "indicates the specification.yaml which will be ingested",
       "schema": {
-        "type": "string"
+        "type": "string",
+        "exclusive-minimum": false
       }
     },
     {
@@ -79,7 +81,9 @@
   ],
   "exit": [
     {
-      "id": "file-not-found"
+      "code": 2,
+      "id": "file-not-found",
+      "message": "Input file not found"
     }
   ]
 }

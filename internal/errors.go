@@ -40,6 +40,18 @@ func (instance *ProblemFactory) GetFileCannotBeOpened(path string, error error) 
 	return &Problem{Code: 1, Message: fmt.Sprintf("file '%s' cannot be opened\ncaused by:%s", path, error)}
 }
 
+func (instance *ProblemFactory) GetUnexpectedState() error {
+	return &Problem{Code: 1, Message: "unexpected application state"}
+}
+
+func (instance *ProblemFactory) GetMissingExit(name string) error {
+	return &Problem{Code: 101, Message: fmt.Sprintf("missing exit[\"id\":\"%s\"]", name)}
+}
+
+func (instance *ProblemFactory) GetMissingParameter(name string) error {
+	return &Problem{Code: 101, Message: fmt.Sprintf("missing parameters[\"id\":\"%s\"]", name)}
+}
+
 type Problem struct {
 	Code    int
 	Message string
