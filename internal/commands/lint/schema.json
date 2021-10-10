@@ -10,18 +10,70 @@
     },
     "commands": {
       "type": "array",
-      "items": { "$ref": "#/$defs/command" }
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/command"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "commands": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/command"
+                },
+                "min-items": 1
+              }
+            },
+            "required": [
+              "name",
+              "description",
+              "commands"
+            ]
+          }
+        ]
+      }
     },
     "description": {
       "type": "string"
     },
     "parameters": {
       "type": "array",
-      "items": { "$ref": "#/$defs/parameter" }
+      "items": {
+        "$ref": "#/$defs/parameter"
+      }
     },
     "exit": {
       "type": "array",
-      "items": { "$ref": "#/$defs/exit" }
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "message"
+        ]
+      }
     }
   },
   "required": [
@@ -46,9 +98,6 @@
         "index": {
           "type": "integer"
         },
-        "refers-to": {
-          "type": "string"
-        },
         "short-form": {
           "type": "string"
         },
@@ -61,18 +110,14 @@
         "default": {
           "type": "string"
         },
-        "schema": { "$ref": "#/$defs/schema"  }
+        "schema": {
+          "$ref": "#/$defs/schema"
+        }
       }
     },
     "exit": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "refers-to": {
-          "type": "string"
-        },
         "code": {
           "type": "integer"
         },
@@ -99,16 +144,80 @@
         "parameters": {
           "type": "array",
           "items": {
-            "type": "object"
+            "oneOf": [
+              {
+                "$ref": "#/$defs/parameter"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "refers-to": {
+                    "type": "string"
+                  },
+                  "index": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "refers-to"
+                ]
+              }
+            ]
           }
         },
         "exit": {
           "type": "array",
-          "items": { "$ref": "#/$defs/exit" }
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/exit"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "refers-to": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "refers-to"
+                ]
+              }
+            ]
+          }
         },
         "commands": {
           "type": "array",
-          "items":  { "$ref": "#/$defs/command" }
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/command"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "commands": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/command"
+                    },
+                    "min-items": 1
+                  }
+                },
+                "required": [
+                  "name",
+                  "description",
+                  "commands"
+                ]
+              }
+            ]
+          }
         }
       }
     },
@@ -185,7 +294,9 @@
           ]
         },
         "items": {
-          "type": { "$ref": "#/$defs/schema"  }
+          "type": {
+            "$ref": "#/$defs/schema"
+          }
         }
       },
       "required": [

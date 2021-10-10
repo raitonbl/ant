@@ -1,8 +1,10 @@
 package message
 
 const (
-	REQUIRED_PARAMETER_MESSAGE                      = "field is required"
-	PARAMETER_FIELD_NOT_ALLOWED                     = "field is not allowed"
+	BLANK_FIELD_MESSAGE = "field mustn't be blank"
+	REPEATED_VALUE_MESSAGE                          = "value must be unique"
+	REQUIRED_FIELD_MESSAGE                          = "field is required"
+	FIELD_NOT_ALLOWED                               = "field is not allowed"
 	PARAMETER_INDEX_GT_ZERO_MESSAGE                 = "field must be greater than zero (0)"
 	PARAMETER_FIELD_NOT_ALLOWED_IN_FLAGS            = "field is not allowed when in=flags"
 	PARAMETER_FIELD_NOT_ALLOWED_IN_ARGUMENTS        = "field is not allowed when in=arguments"

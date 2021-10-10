@@ -6,5 +6,4 @@ type Exit struct {
 	Id       *string `yaml:"id" json:"id,omitempty"`
 	RefersTo *string `yaml:"refers-to" json:"refers-to,omitempty"`
 	Description  *string `yaml:"description" json:"description,omitempty"`
-
 }
