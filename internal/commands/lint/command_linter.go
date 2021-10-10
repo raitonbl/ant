@@ -35,7 +35,7 @@ func (instance *CommandLinter) Lint(ctx internal.ProjectContext, document *struc
 	inCache := make(map[string]*structure.Command)
 
 	for index, command := range document.Subcommands {
-		v, prob := doLintCommand(index, command, when, "", inCache)
+		v, prob := doLintCommand(index, command, when, document, "", inCache)
 
 		if prob != nil {
 			return nil, prob
@@ -47,7 +47,7 @@ func (instance *CommandLinter) Lint(ctx internal.ProjectContext, document *struc
 	return problems, nil
 }
 
-func doLintCommand(index int, instance *structure.Command, when Moment, prefix string, cache map[string]*structure.Command) ([]Violation, error) {
+func doLintCommand(index int, instance *structure.Command, when Moment, document *structure.Specification, prefix string, cache map[string]*structure.Command) ([]Violation, error) {
 	problems := make([]Violation, 0)
 
 	if instance.Id != nil && utils.IsBlank(*instance.Id) {
@@ -84,7 +84,7 @@ func doLintCommand(index int, instance *structure.Command, when Moment, prefix s
 
 	if instance.Exit != nil {
 		for i, exit := range instance.Exit {
-			context := &LintingContext{prefix: fmt.Sprintf("%s/commands/%d/exit/%d", prefix, index, i), schema: nil, when: when, resolve: true}
+			context := &LintingContext{prefix: fmt.Sprintf("%s/commands/%d/exit/%d", prefix, index, i), schema: nil, when: when,document: document, resolve: true}
 			array, err := lintExit(context, exit, when)
 
 			if err != nil {
@@ -97,7 +97,7 @@ func doLintCommand(index int, instance *structure.Command, when Moment, prefix s
 
 	if instance.Parameters != nil {
 		for i, param := range instance.Parameters {
-			context := &LintingContext{prefix: fmt.Sprintf("%s/commands/%d/parameters/%d", prefix, index, i), schema: param.Schema, when: when, resolve: true}
+			context := &LintingContext{prefix: fmt.Sprintf("%s/commands/%d/parameters/%d", prefix, index, i), schema: param.Schema, when: when, document: document, resolve: true}
 			array, err := lintParameter(context, param, when)
 
 			if err != nil {

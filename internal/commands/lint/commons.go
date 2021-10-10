@@ -13,13 +13,15 @@ const (
 	min_length_format_pattern      = "%s/min-length"
 	min_items_format_pattern       = "%s/min-items"
 	parameter_index_format_pattern = "%s/index"
+	refers_to_format_pattern       = "%s/refers-to"
 )
 
 type LintingContext struct {
-	resolve bool
-	prefix  string
-	when    Moment
-	schema  *structure.Schema
+	resolve  bool
+	prefix   string
+	when     Moment
+	schema   *structure.Schema
+	document *structure.Specification
 }
 
 func lintSchema(ctx *LintingContext) []Violation {
@@ -202,20 +204,48 @@ func lintArraySchema(ctx *LintingContext, typeOf structure.SchemaType) []Violati
 }
 
 func lintParameter(ctx *LintingContext, parameter structure.Parameter, when Moment) ([]Violation, error) {
-	//TODO RESOLVE TRUE
 
 	problems := make([]Violation, 0)
+	isValue := isValueParameter(parameter)
 
-	problems = lintParameterInformation(ctx, parameter, when, problems)
+	if !isValue && ctx.resolve {
 
-	if parameter.RefersTo != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/refers-to", ctx.prefix), Message: message.FIELD_NOT_ALLOWED, Type: when})
+		fromReference := findParameterById(ctx.document, parameter.RefersTo)
+
+		if fromReference == nil {
+			return []Violation{{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_REFERENCE, Type: when}}, nil
+		}
+
+		if parameter.Index != nil && fromReference.In == nil {
+			return []Violation{{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED, Type: when}}, nil
+		}
+
+		if parameter.Index != nil && fromReference.In != nil && *fromReference.In != structure.Arguments {
+			return []Violation{{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED, Type: when}}, nil
+		}
+
+		return problems, nil
 	}
 
-	return doLintSchema(ctx, parameter, when, problems)
+	problems = append(problems, lintParameterInformation(ctx, parameter, when)...)
+
+	if isValue && parameter.RefersTo != nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED, Type: when})
+	}
+
+	array, err := doLintSchema(ctx, parameter, when)
+
+	if err != nil {
+		return nil, err
+	}
+
+	problems = append(problems, array...)
+
+	return problems, nil
 }
 
-func lintParameterInformation(ctx *LintingContext, parameter structure.Parameter, when Moment, problems []Violation) []Violation {
+func lintParameterInformation(ctx *LintingContext, parameter structure.Parameter, when Moment) []Violation {
+	problems := make([]Violation, 0)
 
 	if parameter.Id == nil || utils.IsBlank(*parameter.Id) {
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
@@ -249,8 +279,19 @@ func lintParameterInformation(ctx *LintingContext, parameter structure.Parameter
 }
 
 func lintExit(ctx *LintingContext, exit structure.Exit, when Moment) ([]Violation, error) {
-	//TODO RESOLVE TRUE
 	problems := make([]Violation, 0)
+	isValue := isValueExit(exit)
+
+	if !isValue && ctx.resolve {
+
+		fromReference := findExitById(ctx.document, exit.RefersTo)
+
+		if fromReference == nil {
+			return []Violation{{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_REFERENCE, Type: when}}, nil
+		}
+
+		return problems, nil
+	}
 
 	if exit.Id == nil || utils.IsBlank(*exit.Id) {
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
@@ -265,13 +306,16 @@ func lintExit(ctx *LintingContext, exit structure.Exit, when Moment) ([]Violatio
 	}
 
 	if exit.RefersTo != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/refers-to", ctx.prefix), Message: message.FIELD_NOT_ALLOWED, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED, Type: when})
 	}
 
 	return problems, nil
 }
 
-func doLintSchema(ctx *LintingContext, parameter structure.Parameter, when Moment, problems []Violation) ([]Violation, error) {
+func doLintSchema(ctx *LintingContext, parameter structure.Parameter, when Moment) ([]Violation, error) {
+
+	problems := make([]Violation, 0)
+
 	if parameter.Schema == nil {
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s/schema", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
 	}
@@ -292,4 +336,100 @@ func belongsTo(array []string, value string) bool {
 
 	}
 	return false
+}
+
+func isValueParameter(parameter structure.Parameter) bool {
+
+	if parameter.Id != nil {
+		return true
+	}
+
+	if parameter.Description != nil {
+		return true
+	}
+
+	if parameter.Name != nil {
+		return true
+	}
+
+	if parameter.In != nil {
+		return true
+	}
+
+	if parameter.Required != nil {
+		return true
+	}
+
+	if parameter.ShortForm != nil {
+		return true
+	}
+
+	if parameter.DefaultValue != nil {
+		return true
+	}
+
+	if parameter.Schema != nil {
+		return true
+	}
+
+	if parameter.Index != nil && parameter.RefersTo == nil {
+		return true
+	}
+
+	return false
+}
+
+func isValueExit(exit structure.Exit) bool {
+
+	if exit.Id != nil {
+		return true
+	}
+
+	if exit.Description != nil {
+		return true
+	}
+
+	if exit.Code != nil {
+		return true
+	}
+
+	if exit.Message != nil {
+		return true
+	}
+
+	return false
+}
+
+func findParameterById(document *structure.Specification, idRef *string) *structure.Parameter {
+
+	if document.Parameters == nil || idRef == nil {
+		return nil
+	}
+
+	id := *idRef
+
+	for _, each := range document.Parameters {
+		if each.Id != nil && *each.Id == id {
+			return &each
+		}
+	}
+
+	return nil
+}
+
+func findExitById(document *structure.Specification, idRef *string) *structure.Exit {
+
+	if document.Exit == nil || idRef == nil {
+		return nil
+	}
+
+	id := *idRef
+
+	for _, each := range document.Exit {
+		if each.Id != nil && *each.Id == id {
+			return &each
+		}
+	}
+
+	return nil
 }

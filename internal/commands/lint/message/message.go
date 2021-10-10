@@ -1,7 +1,8 @@
 package message
 
 const (
-	BLANK_FIELD_MESSAGE = "field mustn't be blank"
+	UNRESOLVABLE_REFERENCE                          = "reference is unresolvable"
+	BLANK_FIELD_MESSAGE                             = "field mustn't be blank"
 	REPEATED_VALUE_MESSAGE                          = "value must be unique"
 	REQUIRED_FIELD_MESSAGE                          = "field is required"
 	FIELD_NOT_ALLOWED                               = "field is not allowed"
