@@ -20,7 +20,7 @@ func Lint(context internal.ProjectContext) ([]Violation, error) {
 	builder := Builder
 
 	if builder == nil {
-		builder = getLinter()
+		builder = getLinterBuilder()
 	}
 
 	object, err := builder.Build()
@@ -48,9 +48,9 @@ func Lint(context internal.ProjectContext) ([]Violation, error) {
 	return lint(context, object, document, Document)
 }
 
-func getLinter() LinterBuilder {
+func getLinterBuilder() LinterBuilder {
 	builder := DelegatedLinterBuilder{}
-	return builder.Append(&JsonSchemaLinter{})
+	return builder.Append(&JsonSchemaLinter{}).Append(&ExitLinter{}).Append(&ParameterLinter{}).Append(&CommandLinter{})
 }
 
 func lint(context internal.ProjectContext, object Linter, document *structure.Specification, when Moment) ([]Violation, error) {

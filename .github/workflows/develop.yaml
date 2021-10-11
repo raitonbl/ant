@@ -1,0 +1,28 @@
+name: Publish snapshot into S3
+on:
+  pull_request:
+    branches: develop
+
+jobs:
+  deploy:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.16.5' # The Go version to download (if necessary) and use.
+      - run: go mod tidy
+      - run: go build
+      - run: mv cli application
+      - name: Upload to S3 artifact folder
+        uses: medlypharmacy/s3-artifacts-action@master
+        with:
+          aws_access_key_id: ${{ secrets.AWS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_s3_bucket_name: ${{ secrets.AWS_BUCKET }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          source_path: './application'
+          destination_path: "/repositories/binaries/linux/cli/1.0.0.${{ github.run_id }}.${{ github.run_number }}-SNAPSHOT"
+          exclude_repo_from_destination_path: true
+          resource_type: "FILE"

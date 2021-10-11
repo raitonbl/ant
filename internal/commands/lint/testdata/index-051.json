@@ -7,11 +7,13 @@
       "description": "allows to lint the specification in order to determine whether the specification.yaml is valid",
       "parameters": [
         {
-          "refers-to": "filename"
+          "index": 0,
+          "refers-to": "parameter0"
         }
       ],
       "exit": [
         {
+          "code": 1,
           "message": "Unexpected behaviour"
         },
         {
@@ -65,6 +67,22 @@
     {
       "id": "stack",
       "in": "flags",
+      "name": "stack",
+      "description": "indicates the programming language which is used to generate the project",
+      "schema": {
+        "enum": [
+          "java",
+          "python3",
+          "golang"
+        ],
+        "type": "string",
+        "examples": [
+          "java"
+        ]
+      }
+    },
+    {
+      "id": "parameter0",
       "name": "stack",
       "description": "indicates the programming language which is used to generate the project",
       "schema": {

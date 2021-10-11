@@ -12,6 +12,8 @@
       ],
       "exit": [
         {
+          "code": 1,
+          "id": "id",
           "message": "Unexpected behaviour"
         },
         {

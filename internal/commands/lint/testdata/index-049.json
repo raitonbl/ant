@@ -12,10 +12,11 @@
       ],
       "exit": [
         {
+          "code": 1,
           "message": "Unexpected behaviour"
         },
         {
-          "refers-to": "file-not-found"
+          "refers-to": "unresolvable"
         }
       ]
     },

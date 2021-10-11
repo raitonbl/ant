@@ -12,6 +12,7 @@
       ],
       "exit": [
         {
+          "code": 1,
           "message": "Unexpected behaviour"
         },
         {
@@ -53,9 +54,10 @@
   "description": "application that allows an CLI to be built or to build test starting from a specification",
   "parameters": [
     {
-      "id": "filename",
-      "in": "arguments",
       "index": 0,
+      "id": "filename",
+      "short-form": "f",
+      "in": "arguments",
       "name": "filename",
       "description": "indicates the specification.yaml which will be ingested",
       "schema": {

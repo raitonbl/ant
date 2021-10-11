@@ -35,7 +35,7 @@ func (instance *CommandLinter) Lint(ctx internal.ProjectContext, document *struc
 	inCache := make(map[string]*structure.Command)
 
 	for index, command := range document.Subcommands {
-		v, prob := doLintCommand(index, command, when, document, "", inCache)
+		v, prob := doLintCommand(command, when, document, fmt.Sprintf("/commands/%d", index), inCache)
 
 		if prob != nil {
 			return nil, prob
@@ -47,44 +47,44 @@ func (instance *CommandLinter) Lint(ctx internal.ProjectContext, document *struc
 	return problems, nil
 }
 
-func doLintCommand(index int, instance *structure.Command, when Moment, document *structure.Specification, prefix string, cache map[string]*structure.Command) ([]Violation, error) {
+func doLintCommand( instance *structure.Command, when Moment, document *structure.Specification, prefix string, cache map[string]*structure.Command) ([]Violation, error) {
 	problems := make([]Violation, 0)
 
 	if instance.Id != nil && utils.IsBlank(*instance.Id) {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/commands/%d/id", prefix, index), Message: message.BLANK_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", prefix), Message: message.BLANK_FIELD, Type: when})
 	}
 
 	if instance.Id != nil && cache[*instance.Id] != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/commands/%d/id", prefix, index), Message: message.REPEATED_VALUE_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", prefix), Message: message.REPEATED_VALUE, Type: when})
 	}
 
 	if instance.Name == nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/commands/%d/name", prefix, index), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/name", prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if instance.Name != nil && utils.IsBlank(*instance.Name) {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/commands/%d/name", prefix, index), Message: message.BLANK_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/name", prefix), Message: message.BLANK_FIELD, Type: when})
 	}
 
 	if instance.Description == nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/commands/%d/description", prefix, index), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/description", prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if instance.Description != nil && utils.IsBlank(*instance.Description) {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/commands/%d/description", prefix, index), Message: message.BLANK_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/description", prefix), Message: message.BLANK_FIELD, Type: when})
 	}
 
 	if instance.Subcommands != nil && instance.Exit != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/commands/%d/exit", prefix, index), Message: message.FIELD_NOT_ALLOWED, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/exit", prefix), Message: message.FIELD_NOT_ALLOWED, Type: when})
 	}
 
 	if instance.Subcommands != nil && instance.Parameters != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/commands/%d/parameters", prefix, index), Message: message.FIELD_NOT_ALLOWED, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/parameters", prefix), Message: message.FIELD_NOT_ALLOWED, Type: when})
 	}
 
 	if instance.Exit != nil {
-		for i, each := range instance.Exit {
-			context := &LintingContext{prefix: fmt.Sprintf("%s/commands/%d/exit/%d", prefix, index, i), schema: nil, when: when, document: document, resolve: true}
+		for index, each := range instance.Exit {
+			context := &LintingContext{prefix: fmt.Sprintf("%s/exit/%d", prefix, index), schema: nil, when: when, document: document, isLocal: true}
 			array, err := lintExit(context, each, when)
 
 			if err != nil {
@@ -96,8 +96,8 @@ func doLintCommand(index int, instance *structure.Command, when Moment, document
 	}
 
 	if instance.Parameters != nil {
-		for i, each := range instance.Parameters {
-			context := &LintingContext{prefix: fmt.Sprintf("%s/commands/%d/parameters/%d", prefix, index, i), schema: each.Schema, when: when, document: document, resolve: true}
+		for index, each := range instance.Parameters {
+			context := &LintingContext{prefix: fmt.Sprintf("%s/parameters/%d", prefix, index), schema: each.Schema, when: when, document: document, isLocal: true}
 			array, err := lintParameter(context, each, when)
 
 			if err != nil {
@@ -113,9 +113,9 @@ func doLintCommand(index int, instance *structure.Command, when Moment, document
 	}
 
 	if instance.Subcommands != nil {
-		for i, each := range instance.Subcommands {
-			path := fmt.Sprintf("%s/commands/%d/commands/%d", prefix, index, i)
-			array, err := doLintCommand(i, each, when, document, path, cache)
+		for index, each := range instance.Subcommands {
+			path := fmt.Sprintf("%s/commands/%d", prefix, index)
+			array, err := doLintCommand( each, when, document, path, cache)
 
 			if err != nil {
 				return nil, err

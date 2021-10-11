@@ -31,7 +31,7 @@ func (instance *ExitLinter) Lint(ctx internal.ProjectContext, document *structur
 	}
 
 	for index, exit := range document.Exit {
-		context := &LintingContext{prefix: fmt.Sprintf("/exit/%d", index), schema: nil, when: when, document: document,resolve: false}
+		context := &LintingContext{prefix: fmt.Sprintf("/exit/%d", index), schema: nil, when: when, document: document, isLocal: false}
 
 		v, prob := lintExit(context, exit, when)
 

@@ -31,7 +31,7 @@ func (instance *ParameterLinter) Lint(ctx internal.ProjectContext, document *str
 	}
 
 	for index, parameter := range document.Parameters {
-		context := &LintingContext{prefix: fmt.Sprintf("/parameters/%d", index), schema: parameter.Schema, when: when, document: document, resolve: false}
+		context := &LintingContext{prefix: fmt.Sprintf("/parameters/%d", index), schema: parameter.Schema, when: when, document: document, isLocal: false}
 
 		v, prob := lintParameter(context, parameter, when)
 

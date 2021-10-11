@@ -7,11 +7,12 @@
       "description": "allows to lint the specification in order to determine whether the specification.yaml is valid",
       "parameters": [
         {
-          "refers-to": "filename"
+          "refers-to": "unresolvable"
         }
       ],
       "exit": [
         {
+          "code": 1,
           "message": "Unexpected behaviour"
         },
         {

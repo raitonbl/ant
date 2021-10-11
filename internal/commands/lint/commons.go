@@ -17,7 +17,7 @@ const (
 )
 
 type LintingContext struct {
-	resolve  bool
+	isLocal  bool
 	prefix   string
 	when     Moment
 	schema   *structure.Schema
@@ -32,17 +32,17 @@ func lintSchema(ctx *LintingContext) []Violation {
 	problems := make([]Violation, 0)
 
 	if schema.TypeOf == nil {
-		return []Violation{{Path: fmt.Sprintf("%s/type", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when}}
+		return []Violation{{Path: fmt.Sprintf("%s/type", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when}}
 	}
 
 	typeOf := *schema.TypeOf
 
 	if typeOf != structure.String && schema.Format != nil && (*schema.Format == structure.Date || *schema.Format == structure.DateTime || *schema.Format == structure.Binary) {
-		problems = append(problems, Violation{Path: fmt.Sprintf(schema_format_pattern, ctx.prefix), Message: message.PAREMETER_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(schema_format_pattern, ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING, Type: when})
 	}
 
 	if typeOf == structure.String && schema.Format != nil && !(*schema.Format == structure.Date || *schema.Format == structure.DateTime || *schema.Format == structure.Binary) {
-		problems = append(problems, Violation{Path: fmt.Sprintf(schema_format_pattern, ctx.prefix), Message: message.PAREMETER_FORMAT_NOT_ALLOWED_IN_TYPE_STRING, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(schema_format_pattern, ctx.prefix), Message: message.FIELD_FORMAT_NOT_ALLOWED_IN_TYPE_STRING, Type: when})
 	}
 
 	problems = append(problems, lintTextSchema(ctx, typeOf)...)
@@ -52,7 +52,7 @@ func lintSchema(ctx *LintingContext) []Violation {
 	if schema.Enum != nil && schema.Examples != nil && len(schema.Examples) > 0 {
 		for i, example := range schema.Examples {
 			if !belongsTo(schema.Enum, example) {
-				problems = append(problems, Violation{Path: fmt.Sprintf("%s/examples/%d", ctx.prefix, i), Message: message.PARAMETER_EXAMPLE_MUST_BE_PART_OF_ENUM, Type: when})
+				problems = append(problems, Violation{Path: fmt.Sprintf("%s/examples/%d", ctx.prefix, i), Message: message.FIELD_EXAMPLE_MUST_BE_PART_OF_ENUM, Type: when})
 			}
 		}
 	}
@@ -67,19 +67,19 @@ func lintTextSchema(ctx *LintingContext, typeOf structure.SchemaType) []Violatio
 	problems := make([]Violation, 0)
 
 	if typeOf != structure.String && schema.MaxLength != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-length", ctx.prefix), Message: message.PAREMETER_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-length", ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING, Type: when})
 	}
 
 	if typeOf != structure.String && schema.MinLength != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.PAREMETER_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING, Type: when})
 	}
 
 	if typeOf == structure.String && schema.MinLength != nil && *schema.MinLength < 0 {
-		problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.PARAMETER_MIN_LENGTH_GT_ZERO, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.FIELD_MIN_LENGTH_GT_ZERO, Type: when})
 	}
 
 	if typeOf == structure.String && schema.MaxLength != nil && *schema.MaxLength < 0 {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-length", ctx.prefix), Message: message.PARAMETER_MAX_LENGTH_GT_ZERO, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-length", ctx.prefix), Message: message.FIELD_MAX_LENGTH_GT_ZERO, Type: when})
 	}
 
 	if typeOf == structure.String && schema.MaxLength != nil && schema.MinLength != nil {
@@ -87,7 +87,7 @@ func lintTextSchema(ctx *LintingContext, typeOf structure.SchemaType) []Violatio
 		minimum := *schema.MinLength
 
 		if minimum > maximum {
-			problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.PARAMETER_MIN_LENGTH_MUST_NOT_BE_GT_MAX_LENGTH, Type: when})
+			problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.FIELD_MIN_LENGTH_MUST_NOT_BE_GT_MAX_LENGTH, Type: when})
 		}
 
 	}
@@ -106,15 +106,15 @@ func lintNumberSchema(ctx *LintingContext, typeOf structure.SchemaType) []Violat
 	problems := make([]Violation, 0)
 
 	if typeOf != structure.Number && schema.MultipleOf != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/multiple-of", ctx.prefix), Message: message.PAREMETER_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/multiple-of", ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER, Type: when})
 	}
 
 	if typeOf != structure.Number && schema.Maximum != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/maximum", ctx.prefix), Message: message.PAREMETER_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/maximum", ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER, Type: when})
 	}
 
 	if typeOf != structure.Number && schema.Minimum != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.PAREMETER_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER, Type: when})
 	}
 
 	if typeOf == structure.Number && schema.Maximum != nil && schema.Minimum != nil {
@@ -122,7 +122,7 @@ func lintNumberSchema(ctx *LintingContext, typeOf structure.SchemaType) []Violat
 		minimum := *schema.Minimum
 
 		if minimum > maximum {
-			problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.PARAMETER_MIN_MUST_NOT_BE_GT_MAX, Type: when})
+			problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.FIELD_MIN_MUST_NOT_BE_GT_MAX, Type: when})
 		}
 
 	}
@@ -136,11 +136,11 @@ func lintNumberSchema(ctx *LintingContext, typeOf structure.SchemaType) []Violat
 	}
 
 	if typeOf == structure.Number && schema.Maximum == nil && schema.ExclusiveMaximum != nil && *schema.ExclusiveMaximum {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/maximum", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/maximum", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if typeOf == structure.Number && schema.Minimum == nil && schema.ExclusiveMinimum != nil && *schema.ExclusiveMinimum {
-		problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	return problems
@@ -165,7 +165,7 @@ func lintArraySchema(ctx *LintingContext, typeOf structure.SchemaType) []Violati
 	}
 
 	if typeOf == structure.Array && schema.Items == nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/items", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/items", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if typeOf == structure.Array && schema.Format != nil {
@@ -173,11 +173,11 @@ func lintArraySchema(ctx *LintingContext, typeOf structure.SchemaType) []Violati
 	}
 
 	if typeOf == structure.Array && schema.MinItems != nil && *schema.MinItems < 0 {
-		problems = append(problems, Violation{Path: fmt.Sprintf(min_items_format_pattern, ctx.prefix), Message: message.PARAMETER_MIN_ITEMS_GT_ZERO, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(min_items_format_pattern, ctx.prefix), Message: message.FIELD_MIN_ITEMS_GT_ZERO, Type: when})
 	}
 
 	if typeOf == structure.Array && schema.MaxItems != nil && *schema.MaxItems < 0 {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-items", ctx.prefix), Message: message.PARAMETER_MAX_ITEMS_GT_ZERO, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-items", ctx.prefix), Message: message.FIELD_MAX_ITEMS_GT_ZERO, Type: when})
 	}
 
 	if typeOf == structure.Array && schema.MinItems != nil && schema.MaxItems != nil {
@@ -185,13 +185,13 @@ func lintArraySchema(ctx *LintingContext, typeOf structure.SchemaType) []Violati
 		minimum := *schema.MinItems
 
 		if minimum > maximum {
-			problems = append(problems, Violation{Path: fmt.Sprintf(min_items_format_pattern, ctx.prefix), Message: message.PARAMETER_MIN_ITEMS_MUST_NOT_BE_GT_MAX_ITEMS, Type: when})
+			problems = append(problems, Violation{Path: fmt.Sprintf(min_items_format_pattern, ctx.prefix), Message: message.FIELD_MIN_ITEMS_MUST_NOT_BE_GT_MAX_ITEMS, Type: when})
 		}
 
 	}
 
 	if typeOf == structure.Array && schema.Items != nil && schema.Items.TypeOf != nil && *schema.Items.TypeOf == structure.Array {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/items/type", ctx.prefix), Message: message.PARAMETER_TYPE_NOT_ALLOWED, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/items/type", ctx.prefix), Message: message.ARRAY_FIELD_TYPE_NOT_ALLOWED, Type: when})
 		return problems
 	}
 
@@ -208,12 +208,12 @@ func lintParameter(ctx *LintingContext, parameter structure.Parameter, when Mome
 	problems := make([]Violation, 0)
 	isValue := isValueParameter(parameter)
 
-	if !isValue && ctx.resolve {
+	if !isValue && ctx.isLocal {
 
 		fromReference := findParameterById(ctx.document, parameter.RefersTo)
 
 		if fromReference == nil {
-			return []Violation{{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_REFERENCE, Type: when}}, nil
+			return []Violation{{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_FIELD, Type: when}}, nil
 		}
 
 		if parameter.Index != nil && fromReference.In == nil {
@@ -247,32 +247,32 @@ func lintParameter(ctx *LintingContext, parameter structure.Parameter, when Mome
 func lintParameterInformation(ctx *LintingContext, parameter structure.Parameter, when Moment) []Violation {
 	problems := make([]Violation, 0)
 
-	if parameter.Id == nil || utils.IsBlank(*parameter.Id) {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+	if !ctx.isLocal && (parameter.Id == nil || utils.IsBlank(*parameter.Id)) {
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if parameter.Description == nil || utils.IsBlank(*parameter.Description) {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/description", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/description", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if parameter.Name == nil || utils.IsBlank(*parameter.Name) {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/name", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/name", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if parameter.Index != nil && *parameter.Index < 0 {
-		problems = append(problems, Violation{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.PARAMETER_INDEX_GT_ZERO_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.FIELD_INDEX_GT_ZERO, Type: when})
 	}
 
 	if parameter.In == nil || *parameter.In == structure.Flags && parameter.Index != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.PARAMETER_FIELD_NOT_ALLOWED_IN_FLAGS, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED_IN_FLAGS, Type: when})
 	}
 
 	if parameter.In != nil && *parameter.In == structure.Arguments && parameter.Index == nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.REQUIRED_PARAMETER_FIELD_WHEN_IN_ARGUMENTS, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.FIELD_WHEN_IN_ARGUMENTS, Type: when})
 	}
 
 	if parameter.In != nil && *parameter.In == structure.Arguments && parameter.ShortForm != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/short-form", ctx.prefix), Message: message.PARAMETER_FIELD_NOT_ALLOWED_IN_ARGUMENTS, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/short-form", ctx.prefix), Message: message.FIELD_NOT_ALLOWED_IN_ARGUMENTS, Type: when})
 	}
 
 	return problems
@@ -282,27 +282,29 @@ func lintExit(ctx *LintingContext, exit structure.Exit, when Moment) ([]Violatio
 	problems := make([]Violation, 0)
 	isValue := isValueExit(exit)
 
-	if !isValue && ctx.resolve {
+	if !isValue && ctx.isLocal {
 
 		fromReference := findExitById(ctx.document, exit.RefersTo)
 
 		if fromReference == nil {
-			return []Violation{{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_REFERENCE, Type: when}}, nil
+			return []Violation{{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_FIELD, Type: when}}, nil
 		}
 
 		return problems, nil
 	}
 
-	if exit.Id == nil || utils.IsBlank(*exit.Id) {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+	if ctx.isLocal && exit.Id != nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: message.FIELD_NOT_ALLOWED, Type: when})
+	} else if !ctx.isLocal && (exit.Id == nil || utils.IsBlank(*exit.Id)) {
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if exit.Message == nil || utils.IsBlank(*exit.Message) {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/message", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/message", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if exit.Code == nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/code", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/code", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if exit.RefersTo != nil {
@@ -317,7 +319,7 @@ func doLintSchema(ctx *LintingContext, parameter structure.Parameter, when Momen
 	problems := make([]Violation, 0)
 
 	if parameter.Schema == nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/schema", ctx.prefix), Message: message.REQUIRED_FIELD_MESSAGE, Type: when})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/schema", ctx.prefix), Message: message.REQUIRED_FIELD, Type: when})
 	}
 
 	if parameter.Schema != nil {

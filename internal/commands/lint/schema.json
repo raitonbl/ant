@@ -11,34 +11,7 @@
     "commands": {
       "type": "array",
       "items": {
-        "oneOf": [
-          {
-            "$ref": "#/$defs/command"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              },
-              "commands": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/$defs/command"
-                },
-                "min-items": 1
-              }
-            },
-            "required": [
-              "name",
-              "description",
-              "commands"
-            ]
-          }
-        ]
+        "$ref": "#/$defs/command"
       }
     },
     "description": {
@@ -68,6 +41,7 @@
             "type": "string"
           }
         },
+        "additionalProperties": false,
         "required": [
           "id",
           "code",
@@ -85,6 +59,7 @@
   "$defs": {
     "parameter": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "id": {
           "type": "string"
@@ -117,6 +92,7 @@
     },
     "exit": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "code": {
           "type": "integer"
@@ -131,6 +107,7 @@
     },
     "command": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "id": {
           "type": "string"
@@ -267,7 +244,10 @@
           }
         },
         "examples": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "type": {
           "type": "string",
@@ -294,9 +274,7 @@
           ]
         },
         "items": {
-          "type": {
-            "$ref": "#/$defs/schema"
-          }
+          "$ref": "#/$defs/schema"
         }
       },
       "required": [

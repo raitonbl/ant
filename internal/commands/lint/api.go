@@ -44,7 +44,6 @@ func (instance *DelegatedLinterBuilder) Append(object Linter) *DelegatedLinterBu
 	return instance
 }
 
-
 type Moment string
 
 const (

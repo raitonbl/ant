@@ -12,6 +12,7 @@
       ],
       "exit": [
         {
+          "code": 1,
           "message": "Unexpected behaviour"
         },
         {
@@ -63,8 +64,8 @@
       }
     },
     {
+      "index": 0,
       "id": "stack",
-      "in": "flags",
       "name": "stack",
       "description": "indicates the programming language which is used to generate the project",
       "schema": {

@@ -13,7 +13,6 @@ func toString(each *Violation) string {
 	}
 
 	return fmt.Sprintf("{\"path\":\"%s\" , \"message\":\"%s\" , \"type\": \"%s\"}", each.Path, each.Message, each.Type)
-
 }
 
 func toText(array []Violation) string {

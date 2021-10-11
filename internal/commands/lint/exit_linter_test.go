@@ -15,23 +15,23 @@ func TestLintExitIndex003(t *testing.T) {
 }
 
 func TestLintExit_Where_id_is_missing(t *testing.T) {
-	doLintExitSectionLinter(t, "index-040.json", Document, &Violation{Path: "/exit/0/id", Message: message.REQUIRED_FIELD_MESSAGE, Type: Document})
+	doLintExitSectionLinter(t, "index-040.json", Document, &Violation{Path: "/exit/0/id", Message: message.REQUIRED_FIELD, Type: Document})
 }
 
 func TestLintExit_Where_id_is_blank(t *testing.T) {
-	doLintExitSectionLinter(t, "index-042.json", Document, &Violation{Path: "/exit/0/id", Message: message.REQUIRED_FIELD_MESSAGE, Type: Document})
+	doLintExitSectionLinter(t, "index-042.json", Document, &Violation{Path: "/exit/0/id", Message: message.REQUIRED_FIELD, Type: Document})
 }
 
 func TestLintExit_Where_code_is_missing(t *testing.T) {
-	doLintExitSectionLinter(t, "index-041.json", Document, &Violation{Path: "/exit/0/code", Message: message.REQUIRED_FIELD_MESSAGE, Type: Document})
+	doLintExitSectionLinter(t, "index-041.json", Document, &Violation{Path: "/exit/0/code", Message: message.REQUIRED_FIELD, Type: Document})
 }
 
 func TestLintExit_Where_message_is_missing(t *testing.T) {
-	doLintExitSectionLinter(t, "index-043.json", Document, &Violation{Path: "/exit/0/message", Message: message.REQUIRED_FIELD_MESSAGE, Type: Document})
+	doLintExitSectionLinter(t, "index-043.json", Document, &Violation{Path: "/exit/0/message", Message: message.REQUIRED_FIELD, Type: Document})
 }
 
 func TestLintExit_Where_message_is_blank(t *testing.T) {
-	doLintExitSectionLinter(t, "index-044.json", Document, &Violation{Path: "/exit/0/message", Message: message.REQUIRED_FIELD_MESSAGE, Type: Document})
+	doLintExitSectionLinter(t, "index-044.json", Document, &Violation{Path: "/exit/0/message", Message: message.REQUIRED_FIELD, Type: Document})
 }
 
 func TestLintExit_Where_refers_to_is_defined(t *testing.T) {
