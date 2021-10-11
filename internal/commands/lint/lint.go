@@ -5,7 +5,7 @@ import (
 	"github.com/raitonbl/cli/internal/project/structure"
 )
 
-var Builder LinterBuilder
+var factory func() LinterBuilder
 
 func Lint(context internal.ProjectContext) ([]Violation, error) {
 
@@ -17,11 +17,7 @@ func Lint(context internal.ProjectContext) ([]Violation, error) {
 		return nil, internal.GetProblemFactory().GetConfigurationFileNotFound()
 	}
 
-	builder := Builder
-
-	if builder == nil {
-		builder = getLinterBuilder()
-	}
+	builder := getFactory()()
 
 	object, err := builder.Build()
 
@@ -48,9 +44,16 @@ func Lint(context internal.ProjectContext) ([]Violation, error) {
 	return lint(context, object, document, Document)
 }
 
-func getLinterBuilder() LinterBuilder {
-	builder := DelegatedLinterBuilder{}
-	return builder.Append(&JsonSchemaLinter{}).Append(&ExitLinter{}).Append(&ParameterLinter{}).Append(&CommandLinter{})
+func getFactory() func() LinterBuilder {
+	if factory != nil {
+		return factory
+	} else {
+		return func() LinterBuilder {
+			instance := DelegatedLinterBuilder{}
+			return instance.Append(&JsonSchemaLinter{}).Append(&ExitLinter{}).Append(&ParameterLinter{}).Append(&CommandLinter{})
+		}
+	}
+
 }
 
 func lint(context internal.ProjectContext, object Linter, document *structure.Specification, when Moment) ([]Violation, error) {

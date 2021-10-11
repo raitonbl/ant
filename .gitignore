@@ -316,4 +316,5 @@ sonar-project.properties
 bin/
 .scripts/
 .scannerwork/
+cli
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,intellij+all,intellij,intellij+iml,go

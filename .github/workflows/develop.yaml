@@ -2,7 +2,6 @@ name: Publish snapshot into S3
 on:
   pull_request:
     branches: develop
-
 jobs:
   deploy:
     name: build
