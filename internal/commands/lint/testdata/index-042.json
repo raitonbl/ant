@@ -86,6 +86,11 @@
       "code": 2,
       "id": " ",
       "message": "Input file not found"
+    },
+    {
+      "code": 42,
+      "id": "file-not-found",
+      "message": "Input file not found"
     }
   ]
 }

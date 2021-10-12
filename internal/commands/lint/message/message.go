@@ -7,8 +7,6 @@ const (
 	REQUIRED_FIELD                              = "field is required"
 	FIELD_NOT_ALLOWED                           = "field is not allowed"
 	FIELD_INDEX_GT_ZERO                         = "field must be greater than zero (0)"
-	FIELD_NOT_ALLOWED_IN_FLAGS                  = "field is not allowed when in=flags"
-	FIELD_NOT_ALLOWED_IN_ARGUMENTS              = "field is not allowed when in=arguments"
 	FIELD_WHEN_IN_ARGUMENTS                     = "field is required when in=arguments"
 	FIELD_FORMAT_NOT_ALLOWED_IN_TYPE_STRING     = "specified format cannot be applied to type=string"
 	FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING = "specified format can only be applied to type=string"

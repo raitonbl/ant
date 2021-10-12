@@ -1,5 +1,6 @@
 package structure
 
+
 type In string
 
 const (
