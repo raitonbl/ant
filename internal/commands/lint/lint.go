@@ -2,6 +2,7 @@ package lint
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/qri-io/jsonschema"
@@ -9,8 +10,12 @@ import (
 	"github.com/raitonbl/cli/internal/commands/lint/message"
 	"github.com/raitonbl/cli/internal/project/structure"
 	"github.com/raitonbl/cli/internal/utils"
-	"os"
 	"strings"
+)
+
+var (
+	//go:embed schema.json
+	resources embed.FS
 )
 
 type Violation struct {
@@ -72,7 +77,7 @@ func doLint(context internal.ProjectContext) ([]Violation, error) {
 func doLintFile(ctx internal.ProjectContext) ([]Violation, error) {
 	goContext := context.Background()
 
-	binary, err := os.ReadFile("schema.json")
+	binary, err := resources.ReadFile("schema.json")
 
 	if err != nil {
 		return nil, internal.GetProblemFactory().GetProblem(err)
