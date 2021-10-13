@@ -48,7 +48,7 @@ func doLint(context internal.ProjectContext) ([]Violation, error) {
 	problems := make([]Violation, 0)
 
 	if strings.HasSuffix(context.GetProjectFile().GetName(), ".json") {
-		array, err := doLintBinary(context)
+		array, err := doLintFile(context)
 
 		if err != nil {
 			return nil, err
@@ -69,7 +69,7 @@ func doLint(context internal.ProjectContext) ([]Violation, error) {
 	return append(problems, array...), nil
 }
 
-func doLintBinary(ctx internal.ProjectContext) ([]Violation, error) {
+func doLintFile(ctx internal.ProjectContext) ([]Violation, error) {
 	goContext := context.Background()
 
 	binary, err := os.ReadFile("schema.json")
@@ -152,7 +152,7 @@ func doLintExitSection(document *structure.Specification) (map[string]*structure
 
 	for index, exit := range document.Exit {
 
-		ctx := &Context{prefix: fmt.Sprintf("/exit/%d", index), schema: nil, document: document}
+		ctx := &LintContext{prefix: fmt.Sprintf("/exit/%d", index), schema: nil, document: document}
 
 		if exit.Id == nil || utils.IsBlank(*exit.Id) {
 			problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: message.REQUIRED_FIELD})
@@ -182,7 +182,7 @@ func doLintParameterSection(document *structure.Specification) (map[string]*stru
 
 	for index, parameter := range document.Parameters {
 
-		ctx := &Context{prefix: fmt.Sprintf("/parameters/%d", index), schema: parameter.Schema, document: document}
+		ctx := &LintContext{prefix: fmt.Sprintf("/parameters/%d", index), schema: parameter.Schema, document: document}
 
 		if parameter.Id == nil || utils.IsBlank(*parameter.Id) {
 			problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: message.REQUIRED_FIELD})
@@ -196,7 +196,10 @@ func doLintParameterSection(document *structure.Specification) (map[string]*stru
 
 		problems = append(problems, array...)
 
-		cache[*parameter.Id] = &parameter
+		param := parameter
+
+		cache[*parameter.Id] = &param
+
 	}
 
 	return cache, problems, nil
@@ -240,11 +243,11 @@ func doLintCommand(commandContext *CommandLintingContext, instance *structure.Co
 	}
 
 	if instance.Name == nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/name", prefix), Message: message.REQUIRED_FIELD})
+		problems = append(problems, Violation{Path: fmt.Sprintf(name_format_pattern, prefix), Message: message.REQUIRED_FIELD})
 	}
 
 	if instance.Name != nil && utils.IsBlank(*instance.Name) {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/name", prefix), Message: message.BLANK_FIELD})
+		problems = append(problems, Violation{Path: fmt.Sprintf(name_format_pattern, prefix), Message: message.BLANK_FIELD})
 	}
 
 	if instance.Description == nil {
@@ -263,7 +266,21 @@ func doLintCommand(commandContext *CommandLintingContext, instance *structure.Co
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s/parameters", prefix), Message: message.FIELD_NOT_ALLOWED})
 	}
 
-	array,err := doLintCommandExit(commandContext,document,instance)
+	array, err := doLintCommandConfiguration(commandContext, instance, document)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return append(problems, array...), nil
+}
+
+func doLintCommandConfiguration(commandContext *CommandLintingContext, instance *structure.Command, document *structure.Specification) ([]Violation, error) {
+
+	cache := commandContext.cache
+	problems := make([]Violation, 0)
+
+	array, err := doLintCommandExitSection(commandContext, document, instance)
 
 	if err != nil {
 		return nil, err
@@ -286,92 +303,170 @@ func doLintCommand(commandContext *CommandLintingContext, instance *structure.Co
 	array, err = doLintSubcommands(commandContext, document, instance)
 
 	if err != nil {
-		return problems, err
+		return nil, err
 	}
 
 	return append(problems, array...), nil
 }
 
-func doLintCommandExit(commandContext *CommandLintingContext, document *structure.Specification, instance *structure.Command) ([]Violation, error) {
+func doLintCommandExitSection(commandContext *CommandLintingContext, document *structure.Specification, instance *structure.Command) ([]Violation, error) {
 
-	prefix := commandContext.path
-	exitCache := commandContext.exitCache
 	problems := make([]Violation, 0)
 
 	if instance.Exit != nil {
 		for index, each := range instance.Exit {
-
-			exit := &each
-			isReference := isExitReference(&each)
-			ctx := &Context{prefix: fmt.Sprintf("%s/exit/%d", prefix, index), schema: nil, document: document}
-
-			if each.RefersTo != nil && !isReference {
-				problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
-			} else if each.RefersTo != nil && isReference {
-				exit = exitCache[*each.RefersTo]
-
-				if exit == nil {
-					problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_FIELD})
-				}
-
-				continue
-			}
-
-			if exit != nil {
-				array, err := doLintExit(ctx, exit)
-
-				if err != nil {
-					return nil,  err
-				}
-
-				problems = append(problems, array...)
-			}
-
-		}
-	}
-	return problems, nil
-}
-
-func doLintCommandParameters(commandContext *CommandLintingContext, document *structure.Specification, instance *structure.Command) ([]Violation, error) {
-
-	prefix := commandContext.path
-	parameterCache := commandContext.parameterCache
-	problems := make([]Violation, 0)
-
-	if instance.Parameters != nil {
-		for index, each := range instance.Parameters {
-			ctx := &Context{prefix: fmt.Sprintf("%s/parameters/%d", prefix, index), schema: each.Schema, document: document}
-
-			param := &each
-			isReference := isParameterReference(param)
-
-			if each.RefersTo != nil && !isReference {
-				problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
-			} else if each.RefersTo != nil && isReference {
-				param = parameterCache[*each.RefersTo]
-
-				if param == nil {
-					problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_FIELD})
-					continue
-				} else if (param.In == nil || *param.In == structure.Flags) && each.Index != nil {
-					problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
-				} else {
-					continue
-				}
-
-			}
-
-			array, err := doLintParameter(ctx, param)
+			array, err := doLintCommandExit(commandContext, document, index, each)
 
 			if err != nil {
 				return nil, err
 			}
 
 			problems = append(problems, array...)
+
 		}
+	}
+	return problems, nil
+}
+
+func doLintCommandExit(commandContext *CommandLintingContext, document *structure.Specification, index int, each structure.Exit) ([]Violation, error) {
+
+	prefix := commandContext.path
+	problems := make([]Violation, 0)
+	exitCache := commandContext.exitCache
+
+	exit := &each
+	isReference := isExitReference(&each)
+	ctx := &LintContext{prefix: fmt.Sprintf("%s/exit/%d", prefix, index), schema: nil, document: document}
+
+	if each.RefersTo != nil && !isReference {
+		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
+	} else if each.RefersTo != nil && isReference {
+		exit = exitCache[*each.RefersTo]
+
+		if exit == nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_FIELD})
+		}
+
+		return problems, nil
+	}
+
+	if exit != nil {
+		array, err := doLintExit(ctx, exit)
+
+		if err != nil {
+			return nil, err
+		}
+
+		problems = append(problems, array...)
 	}
 
 	return problems, nil
+}
+
+func doLintCommandParameters(commandContext *CommandLintingContext, document *structure.Specification, instance *structure.Command) ([]Violation, error) {
+
+	prefix := commandContext.path
+	problems := make([]Violation, 0)
+
+	if instance.Parameters != nil {
+
+		array, err := doLintCommandParameter(commandContext, instance, prefix, document)
+
+		if err != nil {
+			return nil, err
+		}
+
+		problems = append(problems, array...)
+	}
+
+	return problems, nil
+}
+
+func doLintCommandParameter(commandContext *CommandLintingContext, instance *structure.Command, prefix string, document *structure.Specification) ([]Violation, error) {
+
+	problems := make([]Violation, 0)
+	argNames := make(map[string]*structure.Parameter)
+	flagNames := make(map[string]*structure.Parameter)
+	shortForms := make(map[string]*structure.Parameter)
+
+	for index, each := range instance.Parameters {
+		param := &each
+		ctx := &LintContext{prefix: fmt.Sprintf("%s/parameters/%d", prefix, index), schema: each.Schema, document: document}
+
+		array, skipLintParameter, isUnresolvable := doLintCommandParameterRefersTo(commandContext, ctx, each)
+
+		problems = append(problems, array...)
+
+		if isUnresolvable {
+			continue
+		}
+
+		if param.In == nil || *param.In == structure.Flags {
+			problems = append(problems, doLintCommandFlag(ctx, param, flagNames, shortForms)...)
+		} else if param.In != nil && *param.In == structure.Arguments && param.Name != nil && argNames[*param.Name] != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: message.NOT_AVAILABLE_IN_USE})
+		}
+
+		if skipLintParameter {
+			continue
+		}
+
+		array, err := doLintParameter(ctx, param)
+
+		if err != nil {
+			return nil, err
+		}
+
+		problems = append(problems, array...)
+
+	}
+
+	return problems, nil
+}
+
+func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *LintContext, each structure.Parameter) ([]Violation, bool, bool) {
+	param := &each
+	isUnresolvable := false
+	skipLintParameter := false
+	problems := make([]Violation, 0)
+	isReference := isParameterReference(param)
+	parameterCache := commandContext.parameterCache
+
+	if each.RefersTo != nil && !isReference {
+		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
+	} else if each.RefersTo != nil && isReference {
+		param = parameterCache[*each.RefersTo]
+
+		if param == nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.UNRESOLVABLE_FIELD})
+			isUnresolvable = true
+		} else if (param.In == nil || *param.In == structure.Flags) && each.Index != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
+			isUnresolvable = true
+		} else {
+			skipLintParameter = true
+		}
+	}
+
+	return problems, skipLintParameter, isUnresolvable
+}
+
+func doLintCommandFlag(ctx *LintContext, param *structure.Parameter, flagNames map[string]*structure.Parameter, shortForms map[string]*structure.Parameter) []Violation {
+	problems := make([]Violation, 0)
+
+	if param.Name != nil && flagNames[*param.Name] != nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf(name_format_pattern, ctx.prefix), Message: message.NOT_AVAILABLE_IN_USE})
+	} else if param.Name != nil {
+		flagNames[*param.Name] = param
+	}
+
+	if param.ShortForm != nil && shortForms[*param.ShortForm] != nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/short-form", ctx.prefix), Message: message.REPEATED_VALUE})
+	} else if param.ShortForm != nil {
+		shortForms[*param.ShortForm] = param
+	}
+
+	return problems
 }
 
 func doLintSubcommands(commandContext *CommandLintingContext, document *structure.Specification, instance *structure.Command) ([]Violation, error) {

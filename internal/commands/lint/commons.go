@@ -8,23 +8,23 @@ import (
 )
 
 const (
-	schema_format_pattern          = "%s/format"
-	minimum_format_pattern         = "%s/minimum"
-	min_length_format_pattern      = "%s/min-length"
-	min_items_format_pattern       = "%s/min-items"
-	parameter_index_format_pattern = "%s/index"
-	refers_to_format_pattern       = "%s/refers-to"
+	schema_format_pattern     = "%s/format"
+	minimum_format_pattern    = "%s/minimum"
+	min_length_format_pattern = "%s/min-length"
+	min_items_format_pattern  = "%s/min-items"
+	index_format_pattern      = "%s/index"
+	refers_to_format_pattern  = "%s/refers-to"
+	name_format_pattern       = "%s/name"
 )
 
-type Context struct {
+type LintContext struct {
 	prefix   string
 	schema   *structure.Schema
 	document *structure.Specification
 }
 
-func doLintSchema(ctx *Context) []Violation {
+func doLintSchema(ctx *LintContext) []Violation {
 
-	
 	schema := ctx.schema
 
 	problems := make([]Violation, 0)
@@ -58,105 +58,117 @@ func doLintSchema(ctx *Context) []Violation {
 	return problems
 }
 
-func doLintTextSchema(ctx *Context, typeOf structure.SchemaType) []Violation {
-	
-	schema := ctx.schema
+func doLintTextSchema(ctx *LintContext, typeOf structure.SchemaType) []Violation {
 
+	schema := ctx.schema
 	problems := make([]Violation, 0)
 
-	if typeOf != structure.String && schema.MaxLength != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-length", ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING})
+	if typeOf != structure.String {
+		if schema.MaxLength != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-length", ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING})
+		}
+
+		if schema.MinLength != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING})
+		}
+
+		if schema.Pattern != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s/pattern", ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
+		}
+
+	} else {
+		problems = append(problems, doLintTextSchemaLength(ctx, schema)...)
 	}
 
-	if typeOf != structure.String && schema.MinLength != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_STRING})
-	}
+	return problems
+}
 
-	if typeOf == structure.String && schema.MinLength != nil && *schema.MinLength < 0 {
+func doLintTextSchemaLength(ctx *LintContext, schema *structure.Schema) []Violation {
+	problems := make([]Violation, 0)
+
+	if schema.MinLength != nil && *schema.MinLength < 0 {
 		problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.FIELD_MIN_LENGTH_GT_ZERO})
 	}
 
-	if typeOf == structure.String && schema.MaxLength != nil && *schema.MaxLength < 0 {
+	if schema.MaxLength != nil && *schema.MaxLength < 0 {
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-length", ctx.prefix), Message: message.FIELD_MAX_LENGTH_GT_ZERO})
 	}
 
-	if typeOf == structure.String && schema.MaxLength != nil && schema.MinLength != nil {
+	if schema.MaxLength != nil && schema.MinLength != nil {
 		maximum := *schema.MaxLength
 		minimum := *schema.MinLength
 
 		if minimum > maximum {
 			problems = append(problems, Violation{Path: fmt.Sprintf(min_length_format_pattern, ctx.prefix), Message: message.FIELD_MIN_LENGTH_MUST_NOT_BE_GT_MAX_LENGTH})
 		}
+	}
+	return problems
+}
 
+func doLintNumberSchema(ctx *LintContext, typeOf structure.SchemaType) []Violation {
+
+	schema := ctx.schema
+	problems := make([]Violation, 0)
+
+	if schema.MultipleOf != nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/multiple-of", ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER})
 	}
 
-	if typeOf != structure.String && schema.Pattern != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/pattern", ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
+	if typeOf == structure.Number {
+		if schema.Maximum != nil && schema.Minimum != nil {
+			maximum := *schema.Maximum
+			minimum := *schema.Minimum
+
+			if minimum > maximum {
+				problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.FIELD_MIN_MUST_NOT_BE_GT_MAX})
+			}
+
+		}
+
+		if schema.Maximum == nil && schema.ExclusiveMaximum != nil && *schema.ExclusiveMaximum {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s/maximum", ctx.prefix), Message: message.REQUIRED_FIELD})
+		}
+
+		if schema.Minimum == nil && schema.ExclusiveMinimum != nil && *schema.ExclusiveMinimum {
+			problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.REQUIRED_FIELD})
+		}
+	} else {
+		problems = append(problems, doLintNumberSchemaBoundary(ctx, schema, typeOf)...)
 	}
 
 	return problems
 }
 
-func doLintNumberSchema(ctx *Context, typeOf structure.SchemaType) []Violation {
-	
-	schema := ctx.schema
-
+func doLintNumberSchemaBoundary(ctx *LintContext, schema *structure.Schema, typeOf structure.SchemaType) []Violation {
 	problems := make([]Violation, 0)
 
-	if typeOf != structure.Number && schema.MultipleOf != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/multiple-of", ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER})
-	}
+	if typeOf != structure.Number {
 
-	if typeOf != structure.Number && schema.Maximum != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/maximum", ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER})
-	}
+		if schema.Maximum != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s/maximum", ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER})
+		}
 
-	if typeOf != structure.Number && schema.Minimum != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER})
-	}
+		if schema.Minimum != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.FIELD_FORMAT_IS_ONLY_ALLOWED_IN_TYPE_NUMBER})
+		}
 
-	if typeOf == structure.Number && schema.Maximum != nil && schema.Minimum != nil {
-		maximum := *schema.Maximum
-		minimum := *schema.Minimum
+		if schema.ExclusiveMaximum != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s/exclusive-maximum", ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
+		}
 
-		if minimum > maximum {
-			problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.FIELD_MIN_MUST_NOT_BE_GT_MAX})
+		if schema.ExclusiveMinimum != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s/exclusive-minimum", ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
 		}
 
 	}
 
-	if typeOf != structure.Number && schema.ExclusiveMaximum != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/exclusive-maximum", ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
-	}
-
-	if typeOf != structure.Number && schema.ExclusiveMinimum != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/exclusive-minimum", ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
-	}
-
-	if typeOf == structure.Number && schema.Maximum == nil && schema.ExclusiveMaximum != nil && *schema.ExclusiveMaximum {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/maximum", ctx.prefix), Message: message.REQUIRED_FIELD})
-	}
-
-	if typeOf == structure.Number && schema.Minimum == nil && schema.ExclusiveMinimum != nil && *schema.ExclusiveMinimum {
-		problems = append(problems, Violation{Path: fmt.Sprintf(minimum_format_pattern, ctx.prefix), Message: message.REQUIRED_FIELD})
-	}
-
 	return problems
 }
 
-func doLintArraySchema(ctx *Context, typeOf structure.SchemaType) []Violation {
-	
+func doLintArraySchema(ctx *LintContext, typeOf structure.SchemaType) []Violation {
+
 	schema := ctx.schema
-
-	problems := make([]Violation, 0)
-
-	if typeOf != structure.Array && schema.MaxItems != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-items", ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
-	}
-
-	if typeOf != structure.Array && schema.MinItems != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(min_items_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
-	}
+	problems := doLintArraySchemaLength(ctx, typeOf)
 
 	if typeOf != structure.Array && schema.UniqueItems != nil {
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s/unique-items", ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
@@ -166,8 +178,33 @@ func doLintArraySchema(ctx *Context, typeOf structure.SchemaType) []Violation {
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s/items", ctx.prefix), Message: message.REQUIRED_FIELD})
 	}
 
+	if typeOf == structure.Array && schema.Items != nil && schema.Items.TypeOf != nil && *schema.Items.TypeOf == structure.Array {
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/items/type", ctx.prefix), Message: message.ARRAY_FIELD_TYPE_NOT_ALLOWED})
+		return problems
+	}
+
+	if ctx.schema.Items != nil {
+		copyOf := &LintContext{prefix: ctx.prefix + "/items", schema: ctx.schema.Items}
+		problems = append(problems, doLintSchema(copyOf)...)
+	}
+
 	if typeOf == structure.Array && schema.Format != nil {
 		problems = append(problems, Violation{Path: fmt.Sprintf(schema_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
+	}
+
+	return problems
+}
+
+func doLintArraySchemaLength(ctx *LintContext, typeOf structure.SchemaType) []Violation {
+	schema := ctx.schema
+	problems := make([]Violation, 0)
+
+	if typeOf != structure.Array && schema.MaxItems != nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/max-items", ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
+	}
+
+	if typeOf != structure.Array && schema.MinItems != nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf(min_items_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
 	}
 
 	if typeOf == structure.Array && schema.MinItems != nil && *schema.MinItems < 0 {
@@ -188,20 +225,10 @@ func doLintArraySchema(ctx *Context, typeOf structure.SchemaType) []Violation {
 
 	}
 
-	if typeOf == structure.Array && schema.Items != nil && schema.Items.TypeOf != nil && *schema.Items.TypeOf == structure.Array {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/items/type", ctx.prefix), Message: message.ARRAY_FIELD_TYPE_NOT_ALLOWED})
-		return problems
-	}
-
-	if ctx.schema.Items != nil {
-		copyOf := &Context{prefix: ctx.prefix + "/items", schema: ctx.schema.Items}
-		problems = append(problems, doLintSchema(copyOf)...)
-	}
-
 	return problems
 }
 
-func doLintParameter(ctx *Context, parameter *structure.Parameter) ([]Violation, error) {
+func doLintParameter(ctx *LintContext, parameter *structure.Parameter) ([]Violation, error) {
 
 	problems := make([]Violation, 0)
 	problems = append(problems, doLintParameterFields(ctx, parameter)...)
@@ -217,7 +244,7 @@ func doLintParameter(ctx *Context, parameter *structure.Parameter) ([]Violation,
 	return problems, nil
 }
 
-func doLintParameterFields(ctx *Context, parameter *structure.Parameter) []Violation {
+func doLintParameterFields(ctx *LintContext, parameter *structure.Parameter) []Violation {
 	problems := make([]Violation, 0)
 
 	if parameter == nil {
@@ -233,15 +260,15 @@ func doLintParameterFields(ctx *Context, parameter *structure.Parameter) []Viola
 	}
 
 	if parameter.Index != nil && *parameter.Index < 0 {
-		problems = append(problems, Violation{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.FIELD_INDEX_GT_ZERO})
+		problems = append(problems, Violation{Path: fmt.Sprintf(index_format_pattern, ctx.prefix), Message: message.FIELD_INDEX_GT_ZERO})
 	}
 
 	if (parameter.In == nil || *parameter.In == structure.Flags) && parameter.Index != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
+		problems = append(problems, Violation{Path: fmt.Sprintf(index_format_pattern, ctx.prefix), Message: message.FIELD_NOT_ALLOWED})
 	}
 
 	if parameter.In != nil && *parameter.In == structure.Arguments && parameter.Index == nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(parameter_index_format_pattern, ctx.prefix), Message: message.FIELD_WHEN_IN_ARGUMENTS})
+		problems = append(problems, Violation{Path: fmt.Sprintf(index_format_pattern, ctx.prefix), Message: message.FIELD_WHEN_IN_ARGUMENTS})
 	}
 
 	if parameter.In != nil && *parameter.In == structure.Arguments && parameter.ShortForm != nil {
@@ -255,7 +282,7 @@ func doLintParameterFields(ctx *Context, parameter *structure.Parameter) []Viola
 	return problems
 }
 
-func doLintParameterSchema(ctx *Context, parameter *structure.Parameter) ([]Violation, error) {
+func doLintParameterSchema(ctx *LintContext, parameter *structure.Parameter) ([]Violation, error) {
 
 	problems := make([]Violation, 0)
 
@@ -264,14 +291,14 @@ func doLintParameterSchema(ctx *Context, parameter *structure.Parameter) ([]Viol
 	}
 
 	if parameter.Schema != nil {
-		ctx := Context{prefix: fmt.Sprintf("%s/schema", ctx.prefix), schema: parameter.Schema}
+		ctx := LintContext{prefix: fmt.Sprintf("%s/schema", ctx.prefix), schema: parameter.Schema}
 		problems = append(problems, doLintSchema(&ctx)...)
 	}
 
 	return problems, nil
 }
 
-func doLintExit(ctx *Context, exit *structure.Exit) ([]Violation, error) {
+func doLintExit(ctx *LintContext, exit *structure.Exit) ([]Violation, error) {
 	problems := make([]Violation, 0)
 
 	if exit.Message == nil || utils.IsBlank(*exit.Message) {

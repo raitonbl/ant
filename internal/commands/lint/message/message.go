@@ -20,4 +20,5 @@ const (
 	FIELD_MAX_ITEMS_GT_ZERO                     = "max-items cannot be lesser than zero (0)"
 	FIELD_MIN_ITEMS_GT_ZERO                     = "min-items cannot be lesser than zero (0)"
 	ARRAY_FIELD_TYPE_NOT_ALLOWED                = "type not allowed on array"
+	NOT_AVAILABLE_IN_USE                        = "not available since the value has been defined"
 )

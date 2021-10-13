@@ -22,8 +22,8 @@ commands:
       - name: test
         description: allows to build the test project from the specification.yaml
         parameters:
-          - refers-to: filename
           - refers-to: stack
+          - refers-to: filename
 description: >-
   application that allows an CLI to be built or to build test starting from a
   specification

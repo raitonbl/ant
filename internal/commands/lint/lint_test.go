@@ -156,28 +156,56 @@ func TestLintCommand_where_command_parameter_in_flags_and_index_is_defined(t *te
 	doLintTest(t, "index-052.json", &Violation{Path: "/commands/0/parameters/0/refers-to", Message: message.FIELD_NOT_ALLOWED})
 }
 
-func TestLintExit_Where_id_is_missing(t *testing.T) {
+func TestLintExit_where_id_is_missing(t *testing.T) {
 	doLintTest(t, "index-040.json", &Violation{Path: "/exit/0", Message: "\"id\" value is required"})
 }
 
-func TestLintExit_Where_id_is_blank(t *testing.T) {
+func TestLintExit_where_id_is_blank(t *testing.T) {
 	doLintTest(t, "index-042.json", &Violation{Path: "/exit/0/id", Message: message.REQUIRED_FIELD})
 }
 
-func TestLintExit_Where_code_is_missing(t *testing.T) {
+func TestLintExit_where_code_is_missing(t *testing.T) {
 	doLintTest(t, "index-041.json", &Violation{Path: "/exit/0", Message: "\"code\" value is required"})
 }
 
-func TestLintExit_Where_message_is_missing(t *testing.T) {
+func TestLintExit_where_message_is_missing(t *testing.T) {
 	doLintTest(t, "index-043.json", &Violation{Path: "/exit/0", Message: "\"message\" value is required"})
 }
 
-func TestLintExit_Where_message_is_blank(t *testing.T) {
+func TestLintExit_where_message_is_blank(t *testing.T) {
 	doLintTest(t, "index-044.json", &Violation{Path: "/exit/0/message", Message: message.REQUIRED_FIELD})
 }
 
-func TestLintExit_Where_refers_to_is_defined(t *testing.T) {
+func TestLintExit_where_refers_to_is_defined(t *testing.T) {
 	doLintTest(t, "index-045.json", &Violation{Path: "/exit/0", Message: "additional properties are not allowed"})
+}
+
+func TestLint_where_type_number_and_pattern_defined(t *testing.T) {
+	doLintTest(t, "index-019.json", &Violation{Path: "/parameters/2/schema/pattern", Message: message.FIELD_NOT_ALLOWED})
+}
+
+func TestLint_where_type_string_and_exclusive_minimum_and_minimum_missing(t *testing.T) {
+	doLintTest(t, "index-026.json", &Violation{Path: "/parameters/0/schema/exclusive-minimum", Message: message.FIELD_NOT_ALLOWED})
+}
+
+func TestLint_where_type_string_and_exclusive_maximum_and_maximum_missing(t *testing.T) {
+	doLintTest(t, "index-027.json", &Violation{Path: "/parameters/0/schema/exclusive-maximum", Message: message.FIELD_NOT_ALLOWED})
+}
+
+func TestLint_where_type_number_and_exclusive_minimum_and_minimum_missing(t *testing.T) {
+	doLintTest(t, "index-028.json", &Violation{Path: "/parameters/2/schema/minimum", Message: message.REQUIRED_FIELD})
+}
+
+func TestLint_where_type_number_and_exclusive_maximum_and_maximum_missing(t *testing.T) {
+	doLintTest(t, "index-029.json", &Violation{Path: "/parameters/2/schema/maximum", Message: message.REQUIRED_FIELD})
+}
+
+func TestLint_where_type_number_and_unique_items(t *testing.T) {
+	doLintTest(t, "index-032.json", &Violation{Path: "/parameters/0/schema/unique-items", Message: message.FIELD_NOT_ALLOWED})
+}
+
+func TestLint_where_type_array_and_array_type_undefined(t *testing.T) {
+	doLintTest(t, "index-038.json", &Violation{Path: "/parameters/2/schema/items", Message: "\"type\" value is required"})
 }
 
 func doLintTest(t *testing.T, filename string, object *Violation) {

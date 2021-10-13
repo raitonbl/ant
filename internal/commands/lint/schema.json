@@ -217,10 +217,10 @@
           "type": "integer"
         },
         "exclusive-minimum": {
-          "type": "integer"
+          "type": "boolean"
         },
         "exclusive-maximum": {
-          "type": "integer"
+          "type": "boolean"
         },
         "max-items": {
           "type": "integer"
@@ -229,7 +229,7 @@
           "type": "integer"
         },
         "unique-items": {
-          "type": "integer"
+          "type": "boolean"
         },
         "enum": {
           "type": "array",
@@ -238,10 +238,7 @@
           }
         },
         "pattern": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "type": "string"
         },
         "examples": {
           "type": "array",
