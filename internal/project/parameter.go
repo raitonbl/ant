@@ -1,4 +1,4 @@
-package structure
+package project
 
 
 type In string

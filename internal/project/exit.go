@@ -1,4 +1,4 @@
-package structure
+package project
 
 type Exit struct {
 	Code        *int    `yaml:"code" json:"code,omitempty"`

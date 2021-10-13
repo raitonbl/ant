@@ -1,4 +1,4 @@
-package structure
+package project
 
 type Schema struct {
 	Id *string `yaml:"id" json:"id,omitempty"`

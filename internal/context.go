@@ -2,14 +2,14 @@ package internal
 
 import (
 	"encoding/json"
-	"github.com/raitonbl/cli/internal/project/structure"
+	"github.com/raitonbl/cli/internal/project"
 	"gopkg.in/yaml.v3"
 	"strings"
 )
 
 type ProjectContext interface {
 	GetProjectFile() *File
-	GetDocument() (*structure.Specification, error)
+	GetDocument() (*project.Specification, error)
 }
 
 func GetContext(filename string) (ProjectContext, error) {
@@ -24,15 +24,15 @@ func GetContext(filename string) (ProjectContext, error) {
 
 type DefaultContext struct {
 	projectFile       *File
-	processedDocument *structure.Specification
-	document          *structure.Specification
+	processedDocument *project.Specification
+	document          *project.Specification
 }
 
 func (instance *DefaultContext) GetProjectFile() *File {
 	return instance.projectFile
 }
 
-func (instance *DefaultContext) GetDocument() (*structure.Specification, error) {
+func (instance *DefaultContext) GetDocument() (*project.Specification, error) {
 
 	if instance.document != nil {
 		return instance.document, nil
@@ -57,13 +57,13 @@ func (instance *DefaultContext) GetDocument() (*structure.Specification, error) 
 	return parseYaml(binary)
 }
 
-func parseYaml(binary []byte) (*structure.Specification, error) {
+func parseYaml(binary []byte) (*project.Specification, error) {
 
 	if binary == nil {
 		return nil, GetProblemFactory().GetUnexpectedContext()
 	}
 
-	descriptor := structure.Specification{}
+	descriptor := project.Specification{}
 	err := yaml.Unmarshal(binary, &descriptor)
 
 	if err != nil {
@@ -73,13 +73,13 @@ func parseYaml(binary []byte) (*structure.Specification, error) {
 	return &descriptor, err
 }
 
-func parseJson(binary []byte) (*structure.Specification, error) {
+func parseJson(binary []byte) (*project.Specification, error) {
 
 	if binary == nil {
 		return nil, GetProblemFactory().GetUnexpectedContext()
 	}
 
-	descriptor := structure.Specification{}
+	descriptor := project.Specification{}
 	err := json.Unmarshal(binary, &descriptor)
 
 	if err != nil {

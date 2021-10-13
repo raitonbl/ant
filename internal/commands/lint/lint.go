@@ -8,7 +8,7 @@ import (
 	"github.com/qri-io/jsonschema"
 	"github.com/raitonbl/cli/internal"
 	"github.com/raitonbl/cli/internal/commands/lint/lint_message"
-	"github.com/raitonbl/cli/internal/project/structure"
+	"github.com/raitonbl/cli/internal/project"
 	"github.com/raitonbl/cli/internal/utils"
 	"strings"
 )
@@ -25,10 +25,10 @@ type Violation struct {
 
 type CommandLintingContext struct {
 	path           string
-	commandCache   map[string]*structure.Command
-	exitCache      map[string]*structure.Exit
-	parameterCache map[string]*structure.Parameter
-	schemaCache    map[string]*structure.Schema
+	commandCache   map[string]*project.Command
+	exitCache      map[string]*project.Exit
+	parameterCache map[string]*project.Parameter
+	schemaCache    map[string]*project.Schema
 }
 
 func Lint(context internal.ProjectContext) ([]Violation, error) {
@@ -156,9 +156,9 @@ func doLintObject(ctx internal.ProjectContext) ([]Violation, error) {
 	return append(problems, array...), nil
 }
 
-func doLintSchemaSection(document *structure.Specification) (map[string]*structure.Schema, []Violation, error) {
+func doLintSchemaSection(document *project.Specification) (map[string]*project.Schema, []Violation, error) {
 	problems := make([]Violation, 0)
-	cache := make(map[string]*structure.Schema)
+	cache := make(map[string]*project.Schema)
 
 	if document.Schemas == nil {
 		return cache, problems, nil
@@ -186,9 +186,9 @@ func doLintSchemaSection(document *structure.Specification) (map[string]*structu
 	return cache, problems, nil
 }
 
-func doLintExitSection(document *structure.Specification) (map[string]*structure.Exit, []Violation, error) {
+func doLintExitSection(document *project.Specification) (map[string]*project.Exit, []Violation, error) {
 	problems := make([]Violation, 0)
-	cache := make(map[string]*structure.Exit)
+	cache := make(map[string]*project.Exit)
 
 	if document.Exit == nil {
 		return cache, problems, nil
@@ -216,9 +216,9 @@ func doLintExitSection(document *structure.Specification) (map[string]*structure
 	return cache, problems, nil
 }
 
-func doLintParameterSection(document *structure.Specification, schemaCache map[string]*structure.Schema) (map[string]*structure.Parameter, []Violation, error) {
+func doLintParameterSection(document *project.Specification, schemaCache map[string]*project.Schema) (map[string]*project.Parameter, []Violation, error) {
 	problems := make([]Violation, 0)
-	cache := make(map[string]*structure.Parameter)
+	cache := make(map[string]*project.Parameter)
 
 	if document.Parameters == nil {
 		return cache, problems, nil
@@ -249,9 +249,9 @@ func doLintParameterSection(document *structure.Specification, schemaCache map[s
 	return cache, problems, nil
 }
 
-func doLintCommandSection(document *structure.Specification, parameterCache map[string]*structure.Parameter, exitCache map[string]*structure.Exit, schemas map[string]*structure.Schema) ([]Violation, error) {
+func doLintCommandSection(document *project.Specification, parameterCache map[string]*project.Parameter, exitCache map[string]*project.Exit, schemas map[string]*project.Schema) ([]Violation, error) {
 	problems := make([]Violation, 0)
-	cache := make(map[string]*structure.Command)
+	cache := make(map[string]*project.Command)
 
 	if document.Subcommands == nil {
 		return problems, nil
@@ -272,7 +272,7 @@ func doLintCommandSection(document *structure.Specification, parameterCache map[
 	return problems, nil
 }
 
-func doLintCommand(commandContext *CommandLintingContext, instance *structure.Command, document *structure.Specification) ([]Violation, error) {
+func doLintCommand(commandContext *CommandLintingContext, instance *project.Command, document *project.Specification) ([]Violation, error) {
 
 	cache := commandContext.commandCache
 	prefix := commandContext.path
@@ -319,7 +319,7 @@ func doLintCommand(commandContext *CommandLintingContext, instance *structure.Co
 	return append(problems, array...), nil
 }
 
-func doLintCommandConfiguration(commandContext *CommandLintingContext, instance *structure.Command, document *structure.Specification) ([]Violation, error) {
+func doLintCommandConfiguration(commandContext *CommandLintingContext, instance *project.Command, document *project.Specification) ([]Violation, error) {
 
 	cache := commandContext.commandCache
 	problems := make([]Violation, 0)
@@ -353,7 +353,7 @@ func doLintCommandConfiguration(commandContext *CommandLintingContext, instance 
 	return append(problems, array...), nil
 }
 
-func doLintCommandExitSection(commandContext *CommandLintingContext, document *structure.Specification, instance *structure.Command) ([]Violation, error) {
+func doLintCommandExitSection(commandContext *CommandLintingContext, document *project.Specification, instance *project.Command) ([]Violation, error) {
 
 	problems := make([]Violation, 0)
 
@@ -372,7 +372,7 @@ func doLintCommandExitSection(commandContext *CommandLintingContext, document *s
 	return problems, nil
 }
 
-func doLintCommandExit(commandContext *CommandLintingContext, document *structure.Specification, index int, each structure.Exit) ([]Violation, error) {
+func doLintCommandExit(commandContext *CommandLintingContext, document *project.Specification, index int, each project.Exit) ([]Violation, error) {
 
 	prefix := commandContext.path
 	problems := make([]Violation, 0)
@@ -407,7 +407,7 @@ func doLintCommandExit(commandContext *CommandLintingContext, document *structur
 	return problems, nil
 }
 
-func doLintCommandParameters(commandContext *CommandLintingContext, document *structure.Specification, instance *structure.Command) ([]Violation, error) {
+func doLintCommandParameters(commandContext *CommandLintingContext, document *project.Specification, instance *project.Command) ([]Violation, error) {
 
 	prefix := commandContext.path
 	problems := make([]Violation, 0)
@@ -426,12 +426,12 @@ func doLintCommandParameters(commandContext *CommandLintingContext, document *st
 	return problems, nil
 }
 
-func doLintCommandParameter(commandContext *CommandLintingContext, instance *structure.Command, prefix string, document *structure.Specification) ([]Violation, error) {
+func doLintCommandParameter(commandContext *CommandLintingContext, instance *project.Command, prefix string, document *project.Specification) ([]Violation, error) {
 
 	problems := make([]Violation, 0)
-	argNames := make(map[string]*structure.Parameter)
-	flagNames := make(map[string]*structure.Parameter)
-	shortForms := make(map[string]*structure.Parameter)
+	argNames := make(map[string]*project.Parameter)
+	flagNames := make(map[string]*project.Parameter)
+	shortForms := make(map[string]*project.Parameter)
 
 	for index, each := range instance.Parameters {
 		param := &each
@@ -445,9 +445,9 @@ func doLintCommandParameter(commandContext *CommandLintingContext, instance *str
 			continue
 		}
 
-		if param.In == nil || *param.In == structure.Flags {
+		if param.In == nil || *param.In == project.Flags {
 			problems = append(problems, doLintCommandFlag(ctx, param, flagNames, shortForms)...)
-		} else if param.In != nil && *param.In == structure.Arguments && param.Name != nil && argNames[*param.Name] != nil {
+		} else if param.In != nil && *param.In == project.Arguments && param.Name != nil && argNames[*param.Name] != nil {
 			problems = append(problems, Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.NOT_AVAILABLE_IN_USE})
 		}
 
@@ -468,7 +468,7 @@ func doLintCommandParameter(commandContext *CommandLintingContext, instance *str
 	return problems, nil
 }
 
-func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *LintContext, each structure.Parameter) ([]Violation, bool, bool) {
+func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *LintContext, each project.Parameter) ([]Violation, bool, bool) {
 	param := &each
 	isUnresolvable := false
 	skipLintParameter := false
@@ -484,7 +484,7 @@ func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *
 		if param == nil {
 			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
 			isUnresolvable = true
-		} else if (param.In == nil || *param.In == structure.Flags) && each.Index != nil {
+		} else if (param.In == nil || *param.In == project.Flags) && each.Index != nil {
 			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
 			isUnresolvable = true
 		} else {
@@ -495,7 +495,7 @@ func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *
 	return problems, skipLintParameter, isUnresolvable
 }
 
-func doLintCommandFlag(ctx *LintContext, param *structure.Parameter, flagNames map[string]*structure.Parameter, shortForms map[string]*structure.Parameter) []Violation {
+func doLintCommandFlag(ctx *LintContext, param *project.Parameter, flagNames map[string]*project.Parameter, shortForms map[string]*project.Parameter) []Violation {
 	problems := make([]Violation, 0)
 
 	if param.Name != nil && flagNames[*param.Name] != nil {
@@ -513,7 +513,7 @@ func doLintCommandFlag(ctx *LintContext, param *structure.Parameter, flagNames m
 	return problems
 }
 
-func doLintSubcommands(commandContext *CommandLintingContext, document *structure.Specification, instance *structure.Command) ([]Violation, error) {
+func doLintSubcommands(commandContext *CommandLintingContext, document *project.Specification, instance *project.Command) ([]Violation, error) {
 	cache := commandContext.commandCache
 	prefix := commandContext.path
 	exitCache := commandContext.exitCache
@@ -538,7 +538,7 @@ func doLintSubcommands(commandContext *CommandLintingContext, document *structur
 	return problems, nil
 }
 
-func isExitReference(each *structure.Exit) bool {
+func isExitReference(each *project.Exit) bool {
 
 	if each.Id != nil {
 		return false
@@ -559,7 +559,7 @@ func isExitReference(each *structure.Exit) bool {
 	return true
 }
 
-func isParameterReference(each *structure.Parameter) bool {
+func isParameterReference(each *project.Parameter) bool {
 
 	if each.Id != nil {
 		return false
