@@ -205,7 +205,7 @@ func TestLint_where_type_number_and_unique_items(t *testing.T) {
 }
 
 func TestLint_where_type_array_and_array_type_undefined(t *testing.T) {
-	doLintTest(t, "index-038.json", &Violation{Path: "/parameters/2/schema/items", Message: "\"type\" value is required"})
+	doLintTest(t, "index-038.json", &Violation{Path: "/parameters/2/schema/items/type", Message:  lint_message.REQUIRED_FIELD})
 }
 
 func doLintTest(t *testing.T, filename string, object *Violation) {

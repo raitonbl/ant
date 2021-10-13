@@ -105,7 +105,23 @@
           "type": "string"
         },
         "schema": {
-          "$ref": "#/$defs/schema"
+          "type": "object",
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "refers-to": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "refers-to"
+              ]
+            },
+            {
+              "$ref": "#/$defs/schema"
+            }
+          ]
         }
       }
     },
@@ -292,10 +308,7 @@
         "items": {
           "$ref": "#/$defs/schema"
         }
-      },
-      "required": [
-        "type"
-      ]
+      }
     }
   }
 }
