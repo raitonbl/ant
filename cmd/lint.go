@@ -38,7 +38,7 @@ func doLint() func(map[string]commando.ArgValue, map[string]commando.FlagValue) 
 
 			txt := ""
 			for index, each := range problems {
-				txt += fmt.Sprintf("%d.path:%s\n message:%s", index, each.Path, each.Message)
+				txt += fmt.Sprintf("%d.path:%s\n lint_message:%s", index, each.Path, each.Message)
 			}
 
 			fmt.Print(txt)

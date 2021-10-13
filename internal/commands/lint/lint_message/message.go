@@ -1,4 +1,4 @@
-package message
+package lint_message
 
 const (
 	UNRESOLVABLE_FIELD                          = "field is unresolvable"

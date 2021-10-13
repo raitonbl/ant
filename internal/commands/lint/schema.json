@@ -48,6 +48,25 @@
           "message"
         ]
       }
+    },
+    "schemas": {
+      "type": "object",
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        {
+          "$ref": "#/$defs/parameter"
+        }
+      ]
     }
   },
   "required": [
