@@ -25,9 +25,10 @@ type Violation struct {
 
 type CommandLintingContext struct {
 	path           string
-	cache          map[string]*structure.Command
+	commandCache   map[string]*structure.Command
 	exitCache      map[string]*structure.Exit
 	parameterCache map[string]*structure.Parameter
+	schemaCache    map[string]*structure.Schema
 }
 
 func Lint(context internal.ProjectContext) ([]Violation, error) {
@@ -118,11 +119,19 @@ func doLintObject(ctx internal.ProjectContext) ([]Violation, error) {
 
 	problems := make([]Violation, 0)
 
+	schemaCache, array, err := doLintSchemaSection(document)
+
+	if err != nil {
+		return nil, err
+	}
+
+	problems = append(problems, array...)
+
 	if document.Parameters == nil {
 		return problems, nil
 	}
 
-	parameterCache, array, err := doLintParameterSection(document)
+	parameterCache, array, err := doLintParameterSection(document, schemaCache)
 
 	if err != nil {
 		return nil, err
@@ -138,13 +147,43 @@ func doLintObject(ctx internal.ProjectContext) ([]Violation, error) {
 
 	problems = append(problems, array...)
 
-	array, err = doLintCommandSection(document, parameterCache, exitCache)
+	array, err = doLintCommandSection(document, parameterCache, exitCache, schemaCache)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return append(problems, array...), nil
+}
+
+func doLintSchemaSection(document *structure.Specification) (map[string]*structure.Schema, []Violation, error) {
+	problems := make([]Violation, 0)
+	cache := make(map[string]*structure.Schema)
+
+	if document.Schemas == nil {
+		return cache, problems, nil
+	}
+
+	for index, schema := range document.Schemas {
+
+		ctx := &LintContext{prefix: fmt.Sprintf("/schemas/%d", index), document: document, schemas: cache}
+
+		if schema.Id == nil || utils.IsBlank(*schema.Id) {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: lint_message.REQUIRED_FIELD})
+		}
+
+		if schema.RefersTo != nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s/refers-to", ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
+		}
+
+		array := doLintSchema(ctx, &schema)
+
+		problems = append(problems, array...)
+
+		cache[*schema.Id] = &schema
+	}
+
+	return cache, problems, nil
 }
 
 func doLintExitSection(document *structure.Specification) (map[string]*structure.Exit, []Violation, error) {
@@ -157,7 +196,7 @@ func doLintExitSection(document *structure.Specification) (map[string]*structure
 
 	for index, exit := range document.Exit {
 
-		ctx := &LintContext{prefix: fmt.Sprintf("/exit/%d", index), schema: nil, document: document}
+		ctx := &LintContext{prefix: fmt.Sprintf("/exit/%d", index), document: document}
 
 		if exit.Id == nil || utils.IsBlank(*exit.Id) {
 			problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: lint_message.REQUIRED_FIELD})
@@ -177,7 +216,7 @@ func doLintExitSection(document *structure.Specification) (map[string]*structure
 	return cache, problems, nil
 }
 
-func doLintParameterSection(document *structure.Specification) (map[string]*structure.Parameter, []Violation, error) {
+func doLintParameterSection(document *structure.Specification, schemaCache map[string]*structure.Schema) (map[string]*structure.Parameter, []Violation, error) {
 	problems := make([]Violation, 0)
 	cache := make(map[string]*structure.Parameter)
 
@@ -187,7 +226,7 @@ func doLintParameterSection(document *structure.Specification) (map[string]*stru
 
 	for index, parameter := range document.Parameters {
 
-		ctx := &LintContext{prefix: fmt.Sprintf("/parameters/%d", index), schema: parameter.Schema, document: document}
+		ctx := &LintContext{prefix: fmt.Sprintf("/parameters/%d", index), document: document, schemas: schemaCache}
 
 		if parameter.Id == nil || utils.IsBlank(*parameter.Id) {
 			problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: lint_message.REQUIRED_FIELD})
@@ -210,7 +249,7 @@ func doLintParameterSection(document *structure.Specification) (map[string]*stru
 	return cache, problems, nil
 }
 
-func doLintCommandSection(document *structure.Specification, parameterCache map[string]*structure.Parameter, exitCache map[string]*structure.Exit) ([]Violation, error) {
+func doLintCommandSection(document *structure.Specification, parameterCache map[string]*structure.Parameter, exitCache map[string]*structure.Exit, schemas map[string]*structure.Schema) ([]Violation, error) {
 	problems := make([]Violation, 0)
 	cache := make(map[string]*structure.Command)
 
@@ -219,9 +258,9 @@ func doLintCommandSection(document *structure.Specification, parameterCache map[
 	}
 
 	for index, command := range document.Subcommands {
-		ctx := &CommandLintingContext{path: fmt.Sprintf("/commands/%d", index), parameterCache: parameterCache, exitCache: exitCache, cache: cache}
+		ctx := &CommandLintingContext{path: fmt.Sprintf("/commands/%d", index), parameterCache: parameterCache, exitCache: exitCache, schemaCache: schemas, commandCache: cache}
 
-		v, prob := doLintCommand(ctx, command, document)
+		v, prob := doLintCommand(ctx, &command, document)
 
 		if prob != nil {
 			return nil, prob
@@ -235,7 +274,7 @@ func doLintCommandSection(document *structure.Specification, parameterCache map[
 
 func doLintCommand(commandContext *CommandLintingContext, instance *structure.Command, document *structure.Specification) ([]Violation, error) {
 
-	cache := commandContext.cache
+	cache := commandContext.commandCache
 	prefix := commandContext.path
 	problems := make([]Violation, 0)
 
@@ -282,7 +321,7 @@ func doLintCommand(commandContext *CommandLintingContext, instance *structure.Co
 
 func doLintCommandConfiguration(commandContext *CommandLintingContext, instance *structure.Command, document *structure.Specification) ([]Violation, error) {
 
-	cache := commandContext.cache
+	cache := commandContext.commandCache
 	problems := make([]Violation, 0)
 
 	array, err := doLintCommandExitSection(commandContext, document, instance)
@@ -341,7 +380,7 @@ func doLintCommandExit(commandContext *CommandLintingContext, document *structur
 
 	exit := &each
 	isReference := isExitReference(&each)
-	ctx := &LintContext{prefix: fmt.Sprintf("%s/exit/%d", prefix, index), schema: nil, document: document}
+	ctx := &LintContext{prefix: fmt.Sprintf("%s/exit/%d", prefix, index), document: document}
 
 	if each.RefersTo != nil && !isReference {
 		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
@@ -396,7 +435,7 @@ func doLintCommandParameter(commandContext *CommandLintingContext, instance *str
 
 	for index, each := range instance.Parameters {
 		param := &each
-		ctx := &LintContext{prefix: fmt.Sprintf("%s/parameters/%d", prefix, index), schema: each.Schema, document: document}
+		ctx := &LintContext{prefix: fmt.Sprintf("%s/parameters/%d", prefix, index), document: document, schemas: commandContext.schemaCache}
 
 		array, skipLintParameter, isUnresolvable := doLintCommandParameterRefersTo(commandContext, ctx, each)
 
@@ -475,16 +514,18 @@ func doLintCommandFlag(ctx *LintContext, param *structure.Parameter, flagNames m
 }
 
 func doLintSubcommands(commandContext *CommandLintingContext, document *structure.Specification, instance *structure.Command) ([]Violation, error) {
-	cache := commandContext.cache
+	cache := commandContext.commandCache
 	prefix := commandContext.path
 	exitCache := commandContext.exitCache
+	schemaCache := commandContext.schemaCache
 	parameterCache := commandContext.parameterCache
+
 	problems := make([]Violation, 0)
 
 	if instance.Subcommands != nil {
 		for index, command := range instance.Subcommands {
 			path := fmt.Sprintf("%s/commands/%d", prefix, index)
-			ctx := &CommandLintingContext{path: path, parameterCache: parameterCache, exitCache: exitCache, cache: cache}
+			ctx := &CommandLintingContext{path: path, parameterCache: parameterCache, exitCache: exitCache, schemaCache: schemaCache, commandCache: cache}
 			array, err := doLintCommand(ctx, command, document)
 
 			if err != nil {

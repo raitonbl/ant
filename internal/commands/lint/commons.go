@@ -19,18 +19,20 @@ const (
 
 type LintContext struct {
 	prefix   string
-	schema   *structure.Schema
 	document *structure.Specification
+	schemas  map[string]*structure.Schema
 }
 
-func doLintSchema(ctx *LintContext) []Violation {
+func doLintSchema(ctx *LintContext, schema *structure.Schema) []Violation {
 
-	schema := ctx.schema
+	problems, skip := doLintResolvableSchema(ctx, schema)
 
-	problems := make([]Violation, 0)
+	if skip {
+		return problems
+	}
 
-	if schema.TypeOf == nil {
-		return []Violation{{Path: fmt.Sprintf("%s/type", ctx.prefix), Message: lint_message.REQUIRED_FIELD}}
+	if schema.RefersTo != nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
 	}
 
 	typeOf := *schema.TypeOf
@@ -43,9 +45,9 @@ func doLintSchema(ctx *LintContext) []Violation {
 		problems = append(problems, Violation{Path: fmt.Sprintf(schema_format_pattern, ctx.prefix), Message: lint_message.FIELD_FORMAT_NOT_ALLOWED_IN_TYPE_STRING})
 	}
 
-	problems = append(problems, doLintTextSchema(ctx, typeOf)...)
-	problems = append(problems, doLintArraySchema(ctx, typeOf)...)
-	problems = append(problems, doLintNumberSchema(ctx, typeOf)...)
+	problems = append(problems, doLintTextSchema(ctx, schema, typeOf)...)
+	problems = append(problems, doLintArraySchema(ctx, schema, typeOf)...)
+	problems = append(problems, doLintNumberSchema(ctx, schema, typeOf)...)
 
 	if schema.Enum != nil && schema.Examples != nil && len(schema.Examples) > 0 {
 		for i, example := range schema.Examples {
@@ -58,9 +60,26 @@ func doLintSchema(ctx *LintContext) []Violation {
 	return problems
 }
 
-func doLintTextSchema(ctx *LintContext, typeOf structure.SchemaType) []Violation {
+func doLintResolvableSchema(ctx *LintContext, schema *structure.Schema) ([]Violation, bool) {
+	problems := make([]Violation, 0)
 
-	schema := ctx.schema
+	if schema.TypeOf == nil && schema.RefersTo == nil {
+		return []Violation{{Path: fmt.Sprintf("%s/type", ctx.prefix), Message: lint_message.REQUIRED_FIELD}}, true
+	} else if schema.TypeOf == nil && schema.RefersTo != nil {
+
+		fromCache := ctx.schemas[*schema.RefersTo]
+
+		if fromCache == nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
+		}
+
+		return problems, true
+	}
+	return problems, false
+}
+
+func doLintTextSchema(ctx *LintContext, schema *structure.Schema, typeOf structure.SchemaType) []Violation {
+
 	problems := make([]Violation, 0)
 
 	if typeOf != structure.String {
@@ -105,9 +124,8 @@ func doLintTextSchemaLength(ctx *LintContext, schema *structure.Schema) []Violat
 	return problems
 }
 
-func doLintNumberSchema(ctx *LintContext, typeOf structure.SchemaType) []Violation {
+func doLintNumberSchema(ctx *LintContext, schema *structure.Schema, typeOf structure.SchemaType) []Violation {
 
-	schema := ctx.schema
 	problems := make([]Violation, 0)
 
 	if schema.MultipleOf != nil {
@@ -165,17 +183,12 @@ func doLintNumberSchemaBoundary(ctx *LintContext, schema *structure.Schema, type
 	return problems
 }
 
-func doLintArraySchema(ctx *LintContext, typeOf structure.SchemaType) []Violation {
+func doLintArraySchema(ctx *LintContext, schema *structure.Schema, typeOf structure.SchemaType) []Violation {
 
-	schema := ctx.schema
-	problems := doLintArraySchemaLength(ctx, typeOf)
+	problems := doLintArraySchemaLength(ctx, schema, typeOf)
 
 	if typeOf != structure.Array && schema.UniqueItems != nil {
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s/unique-items", ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
-	}
-
-	if typeOf == structure.Array && schema.Items == nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/items", ctx.prefix), Message: lint_message.REQUIRED_FIELD})
 	}
 
 	if typeOf == structure.Array && schema.Items != nil && schema.Items.TypeOf != nil && *schema.Items.TypeOf == structure.Array {
@@ -183,9 +196,13 @@ func doLintArraySchema(ctx *LintContext, typeOf structure.SchemaType) []Violatio
 		return problems
 	}
 
-	if ctx.schema.Items != nil {
-		copyOf := &LintContext{prefix: ctx.prefix + "/items", schema: ctx.schema.Items}
-		problems = append(problems, doLintSchema(copyOf)...)
+	if typeOf == structure.Array && schema.Items == nil && schema.RefersTo == nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/items", ctx.prefix), Message: lint_message.REQUIRED_FIELD})
+	}
+
+	if schema.Items != nil {
+		copyOf := &LintContext{prefix: ctx.prefix + "/items", schemas: ctx.schemas}
+		problems = append(problems, doLintSchema(copyOf, schema.Items)...)
 	}
 
 	if typeOf == structure.Array && schema.Format != nil {
@@ -195,8 +212,8 @@ func doLintArraySchema(ctx *LintContext, typeOf structure.SchemaType) []Violatio
 	return problems
 }
 
-func doLintArraySchemaLength(ctx *LintContext, typeOf structure.SchemaType) []Violation {
-	schema := ctx.schema
+func doLintArraySchemaLength(ctx *LintContext, schema *structure.Schema, typeOf structure.SchemaType) []Violation {
+
 	problems := make([]Violation, 0)
 
 	if typeOf != structure.Array && schema.MaxItems != nil {
@@ -230,8 +247,19 @@ func doLintArraySchemaLength(ctx *LintContext, typeOf structure.SchemaType) []Vi
 
 func doLintParameter(ctx *LintContext, parameter *structure.Parameter) ([]Violation, error) {
 
+	schema := parameter.Schema
 	problems := make([]Violation, 0)
 	problems = append(problems, doLintParameterFields(ctx, parameter)...)
+
+	if parameter.Schema != nil && parameter.Schema.RefersTo != nil {
+		schema = ctx.schemas[*parameter.Schema.RefersTo]
+
+		if schema == nil {
+			problems = append(problems, Violation{Path: fmt.Sprintf("%s/schema/refers-to", ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
+		}
+
+		return problems, nil
+	}
 
 	array, err := doLintParameterSchema(ctx, parameter)
 
@@ -291,8 +319,8 @@ func doLintParameterSchema(ctx *LintContext, parameter *structure.Parameter) ([]
 	}
 
 	if parameter.Schema != nil {
-		ctx := LintContext{prefix: fmt.Sprintf("%s/schema", ctx.prefix), schema: parameter.Schema}
-		problems = append(problems, doLintSchema(&ctx)...)
+		context := LintContext{prefix: fmt.Sprintf("%s/schema", ctx.prefix), schemas: ctx.schemas}
+		problems = append(problems, doLintSchema(&context, parameter.Schema)...)
 	}
 
 	return problems, nil

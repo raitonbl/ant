@@ -50,23 +50,10 @@
       }
     },
     "schemas": {
-      "type": "object",
-      "allOf": [
-        {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id"
-          ]
-        },
-        {
-          "$ref": "#/$defs/parameter"
-        }
-      ]
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/schema-definition"
+      }
     }
   },
   "required": [
@@ -109,6 +96,7 @@
           "oneOf": [
             {
               "type": "object",
+              "additionalProperties": false,
               "properties": {
                 "refers-to": {
                   "type": "string"
@@ -235,6 +223,7 @@
     },
     "schema": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "multiple-of": {
           "type": "number"
@@ -306,9 +295,125 @@
           ]
         },
         "items": {
-          "$ref": "#/$defs/schema"
+          "oneOf": [
+            {
+              "$ref": "#/$defs/schema"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "refers-to": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "refers-to"
+              ]
+            }
+          ]
         }
       }
+    },
+    "schema-definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "multiple-of": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "integer"
+        },
+        "minimum": {
+          "type": "integer"
+        },
+        "max-length": {
+          "type": "integer"
+        },
+        "min-length": {
+          "type": "integer"
+        },
+        "exclusive-minimum": {
+          "type": "boolean"
+        },
+        "exclusive-maximum": {
+          "type": "boolean"
+        },
+        "max-items": {
+          "type": "integer"
+        },
+        "min-items": {
+          "type": "integer"
+        },
+        "unique-items": {
+          "type": "boolean"
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "array"
+          ]
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "",
+            "byte",
+            "date",
+            "int64",
+            "int32",
+            "float",
+            "double",
+            "binary",
+            "datetime",
+            "pattern"
+          ]
+        },
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/schema"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "refers-to": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "refers-to"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ]
     }
   }
 }

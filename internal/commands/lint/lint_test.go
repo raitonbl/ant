@@ -7,11 +7,27 @@ import (
 	"testing"
 )
 
-func TestLintFromJson(t *testing.T) {
+func TestLint_from_json(t *testing.T) {
 	doLintTest(t, "index-003.json", nil)
 }
 
-func TestLintFromYaml(t *testing.T) {
+func TestLint_from_json_where_schema_has_refers_to( t *testing.T) {
+	doLintTest(t, "index-053.json", nil)
+}
+
+func TestLint_from_json_where_array_schema_has_refers_to( t *testing.T) {
+	doLintTest(t, "index-055.json", nil)
+}
+
+func TestLint_from_json_where_array_schema_has_refers_to_and_is_refers_to( t *testing.T) {
+	doLintTest(t, "index-056.json", nil)
+}
+
+func TestLint_from_json_where_schema_has_refers_to_and_refers_to_is_unresolvable( t *testing.T) {
+	doLintTest(t, "index-054.json", &Violation{Path: "/parameters/1/schema/refers-to", Message: lint_message.UNRESOLVABLE_FIELD})
+}
+
+func TestLint_from_yaml(t *testing.T) {
 	doLintTest(t, "index-003.yaml", nil)
 }
 

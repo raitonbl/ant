@@ -1,6 +1,8 @@
 package structure
 
 type Schema struct {
+	Id *string `yaml:"id" json:"id,omitempty"`
+
 	// applies to number
 	MultipleOf *int `yaml:"multiple-of" json:"multiple-of,omitempty"`
 	Maximum    *int `yaml:"maximum" json:"maximum,omitempty"`
@@ -17,11 +19,13 @@ type Schema struct {
 	UniqueItems *bool   `yaml:"unique-items" json:"unique-items,omitempty"`
 	Items       *Schema `yaml:"items" json:"items,omitempty"`
 	// applies to everything
-	Enum     []string      `yaml:"enum" json:"enum,omitempty"`
-	Pattern  *string       `yaml:"pattern" json:"pattern,omitempty"`
+	Enum []string `yaml:"enum" json:"enum,omitempty"`
+	// object
 	Examples []string      `yaml:"examples" json:"examples,omitempty"`
 	TypeOf   *SchemaType   `yaml:"type" json:"type,omitempty"`
 	Format   *SchemaFormat `yaml:"format" json:"format,omitempty"`
+	Pattern  *string       `yaml:"pattern" json:"pattern,omitempty"`
+	RefersTo *string       `yaml:"refers-to" json:"refers-to,omitempty"`
 }
 
 type SchemaType string
