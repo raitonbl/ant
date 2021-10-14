@@ -59,6 +59,7 @@ jobs:
     runs-on: windows-latest
     env:
       GITHUB_LABEL: RELEASE
+      S3_FILE: ant.exe
       S3_DIRECTORY: windows
       SECRET_AWS_BUCKET: ${{ secrets.AWS_BUCKET  }}
     steps:
