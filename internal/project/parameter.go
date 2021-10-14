@@ -19,3 +19,49 @@ type Parameter struct {
 	DefaultValue *string `yaml:"default" json:"default,omitempty"`
 	Schema       *Schema `yaml:"schema" json:"schema,omitempty"`
 }
+
+func (instance Parameter) Clone() *Parameter {
+	object := Parameter{}
+
+	if instance.Id != nil {
+		object.Id = instance.Id
+	}
+
+	if instance.In != nil {
+		object.In = instance.In
+	}
+
+	if instance.Index != nil {
+		object.Index = instance.Index
+	}
+
+	if instance.Required != nil {
+		object.Required = instance.Required
+	}
+
+	if instance.Name != nil {
+		object.Name = instance.Name
+	}
+
+	if instance.ShortForm != nil {
+		object.ShortForm = instance.ShortForm
+	}
+
+	if instance.Description != nil {
+		object.Description = instance.Description
+	}
+
+	if instance.RefersTo != nil {
+		object.RefersTo = instance.RefersTo
+	}
+
+	if instance.DefaultValue != nil {
+		object.DefaultValue = instance.DefaultValue
+	}
+
+	if instance.Schema != nil {
+		object.Schema = instance.Schema
+	}
+
+	return &object
+}

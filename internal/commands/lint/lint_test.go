@@ -19,6 +19,10 @@ func TestLint_from_yaml_where_multiple_args(t *testing.T) {
 	doLintTest(t, "index-058.yaml")
 }
 
+func TestLint_from_yaml_where_multiple_args_with_same_index(t *testing.T) {
+	doLintTest(t, "index-059.yaml",Violation{Path: "/commands/1/commands/1/parameters", Message: lint_message.ARGS_INDEX_NOT_UNIQUE})
+}
+
 func TestLint_from_json_where_array_schema_has_refers_to(t *testing.T) {
 	doLintTest(t, "index-055.json")
 }
@@ -57,7 +61,11 @@ func TestLint_where_schema_is_missing(t *testing.T) {
 }
 
 func TestLint_where_index_Is_Negative(t *testing.T) {
-	doLintTest(t, "index-009.json", Violation{Path: "/parameters/0/index", Message: lint_message.FIELD_INDEX_GT_ZERO})
+	doLintTest(t, "index-009.json", Violation{Path: "/parameters/0/index",
+		Message: lint_message.FIELD_INDEX_GT_ZERO},
+		Violation{Path: "/commands/0/parameters", Message: lint_message.ARGS_INDEX_NOT_ORDERED},
+		Violation{Path: "/commands/1/commands/0/parameters", Message: lint_message.ARGS_INDEX_NOT_ORDERED},
+		Violation{Path: "/commands/1/commands/1/parameters", Message: lint_message.ARGS_INDEX_NOT_ORDERED})
 }
 
 func TestLint_where_description_is_missing(t *testing.T) {

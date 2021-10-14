@@ -9,6 +9,12 @@ import (
 	"sort"
 )
 
+type CommandCacheContext struct {
+	args       map[string]*project.Parameter
+	flags      map[string]*project.Parameter
+	shortForms map[string]*project.Parameter
+}
+
 func doLintParameterSection(document *project.Specification, schemaCache map[string]*project.Schema) (map[string]*project.Parameter, []Violation, error) {
 	problems := make([]Violation, 0)
 	cache := make(map[string]*project.Parameter)
@@ -71,36 +77,16 @@ func doLintCommandParameters(commandContext *CommandLintingContext, instance *pr
 	args := make(map[string]*project.Parameter)
 	flags := make(map[string]*project.Parameter)
 	shortForms := make(map[string]*project.Parameter)
+	cacheContext := &CommandCacheContext{args: args, flags: flags, shortForms: shortForms}
 
 	for index, each := range instance.Parameters {
-		param := &each
 		ctx := &LintContext{prefix: fmt.Sprintf("%s/parameters/%d", prefix, index), document: document, schemas: commandContext.schemaCache}
-
-		array, skipLintParameter, param := doLintCommandParameterRefersTo(commandContext, ctx, each)
-
-		problems = append(problems, array...)
-
-		if param == nil {
-			continue
-		}
-
-		if param.In == nil || *param.In == project.Flags {
-			problems = append(problems, doLintCommandParameterInFlags(ctx, param, flags, shortForms)...)
-		} else if param.In != nil && *param.In == project.Arguments && param.Name != nil && args[*param.Name] != nil {
-			problems = append(problems, Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.NOT_AVAILABLE_IN_USE})
-		} else if param.In != nil && *param.In == project.Arguments {
-			args[*param.Id] = param
-		}
-
-		if skipLintParameter {
-			continue
-		}
-
-		array, err := doLintParameter(ctx, param)
+		array, err := doLintCommandParameter(commandContext, ctx, cacheContext, &each)
 
 		if err != nil {
 			return nil, err
 		}
+
 
 		problems = append(problems, array...)
 
@@ -112,6 +98,46 @@ func doLintCommandParameters(commandContext *CommandLintingContext, instance *pr
 	return problems, nil
 }
 
+func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintContext, cacheContext *CommandCacheContext, each *project.Parameter) ([]Violation, error) {
+	args := cacheContext.args
+	flags := cacheContext.flags
+	shortForms := cacheContext.shortForms
+
+	param := each
+	problems := make([]Violation, 0)
+	array, skipLintParameter, param := doLintCommandParameterRefersTo(commandContext, ctx, *each)
+
+	problems = append(problems, array...)
+
+	if param == nil {
+		return problems, nil
+	}
+
+	if param.In != nil && *param.In == project.Arguments && param.Name != nil && args[*param.Name] != nil {
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.NOT_AVAILABLE_IN_USE})
+	}
+
+	if param.In != nil && *param.In == project.Arguments {
+		args[*param.Id] = param
+	}
+
+	if param.In == nil || *param.In == project.Flags {
+		problems = append(problems, doLintCommandParameterInFlags(ctx, param, flags, shortForms)...)
+	}
+
+	if skipLintParameter {
+		return problems, nil
+	}
+
+	array, err := doLintParameter(ctx, param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return append(problems, array...), nil
+}
+
 func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *LintContext, each project.Parameter) ([]Violation, bool, *project.Parameter) {
 	param := &each
 	skipLintParameter := false
@@ -120,6 +146,7 @@ func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *
 	parameterCache := commandContext.parameterCache
 
 	if each.RefersTo != nil && !isReference {
+		param = nil
 		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
 	} else if each.RefersTo != nil && isReference {
 		param = parameterCache[*each.RefersTo]
@@ -130,6 +157,13 @@ func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *
 		} else if (param.In == nil || *param.In == project.Flags) && each.Index != nil {
 			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
 			param = nil
+		} else if param.In != nil && *param.In == project.Arguments && each.Index != nil {
+			param = param.Clone()
+			param.RefersTo = nil
+			param.Index = each.Index
+			skipLintParameter = false
+		} else if param.In != nil && *param.In == project.Arguments && each.Index == nil {
+			skipLintParameter = true
 		} else {
 			param = nil
 			skipLintParameter = true
@@ -162,7 +196,9 @@ func doLintCommandParameterInArguments(ctx *LintContext, args map[string]*projec
 	seq := make([]*project.Parameter, 0)
 
 	for _, value := range args {
-		seq = append(seq, value)
+		if value.Index != nil {
+			seq = append(seq, value)
+		}
 	}
 
 	sort.Sort(ArgParameter(seq))
@@ -170,6 +206,7 @@ func doLintCommandParameterInArguments(ctx *LintContext, args map[string]*projec
 	indexes := make([]int, 0)
 
 	for _, each := range seq {
+
 		if len(indexes) == 0 && *each.Index != 0 {
 			problems = append(problems, Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.ARGS_INDEX_NOT_ORDERED})
 		} else if funk.Contains(indexes, *each.Index) {
