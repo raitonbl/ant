@@ -22,6 +22,10 @@ jobs:
         name: download dependencies
       - run: ./build/build.sh
         name: build binary
+      - name: Read Version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=$VER" >> $GITHUB_ENV
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -29,9 +33,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/linux/application
-      - name: upload to schema
-        run: aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/linux/schema.json
+        run: |
+          VERSION=$(cat "docs/version")
+          aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/$VERSION-$GITHUB_LABEL.$GITHUB_RUN_ID.$GITHUB_RUN_NUMBER/linux/application
+          aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/linux/schema.json
 
   macOS:
     name: macos
