@@ -1,8 +1,8 @@
-module github.com/raitonbl/cli
+module github.com/raitonbl/ant
 
 go 1.16
 
-replace github.com/raitonbl/cli => ./
+replace github.com/raitonbl/ant => ./
 
 require (
 	github.com/qri-io/jsonschema v0.2.1

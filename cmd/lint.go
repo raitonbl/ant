@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/raitonbl/cli/internal"
-	"github.com/raitonbl/cli/internal/commands/lint"
+	"github.com/raitonbl/ant/internal"
+	"github.com/raitonbl/ant/internal/commands/lint"
 	"github.com/thatisuday/commando"
 	"os"
 )

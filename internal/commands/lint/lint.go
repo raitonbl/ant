@@ -5,8 +5,8 @@ import (
 	"embed"
 	"encoding/json"
 	"github.com/qri-io/jsonschema"
-	"github.com/raitonbl/cli/internal"
-	"github.com/raitonbl/cli/internal/project"
+	"github.com/raitonbl/ant/internal"
+	"github.com/raitonbl/ant/internal/project"
 	"sigs.k8s.io/yaml"
 	"strings"
 )

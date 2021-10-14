@@ -2,7 +2,7 @@ package internal
 
 import (
 	"encoding/json"
-	"github.com/raitonbl/cli/internal/project"
+	"github.com/raitonbl/ant/internal/project"
 	"gopkg.in/yaml.v3"
 	"strings"
 )

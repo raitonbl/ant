@@ -2,8 +2,8 @@ package lint
 
 import (
 	"fmt"
-	"github.com/raitonbl/cli/internal"
-	"github.com/raitonbl/cli/internal/commands/lint/lint_message"
+	"github.com/raitonbl/ant/internal"
+	"github.com/raitonbl/ant/internal/commands/lint/lint_message"
 	"testing"
 )
 

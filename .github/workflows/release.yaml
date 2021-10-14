@@ -1,12 +1,8 @@
 name: Deploy
 on:
-  push:
+  pull_request:
     branches:
-      - '*'
-      - '**'
-      - '!releases/*'
-      - '!releases/*/*'
-      - '!releases/**'
+      - 'main'
 jobs:
   build:
     name: linux
@@ -27,9 +23,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/linux/application
+        run: aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/releases/1.0.0.${{ github.run_id }}.${{ github.run_number }}/linux/application
       - name: upload to schema
-        run: aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/linux/schema.json
+        run: aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/releases/1.0.0.${{ github.run_id }}.${{ github.run_number }}/linux/schema.json
 
   macOS:
     name: macos
@@ -50,9 +46,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/macos/application
+        run: aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/releases/1.0.0.${{ github.run_id }}.${{ github.run_number }}/macos/application
       - name: upload to schema
-        run: aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/macos/schema.json
+        run: aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/releases/1.0.0.${{ github.run_id }}.${{ github.run_number }}/macos/schema.json
 
   windows:
     name: windows
@@ -73,6 +69,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/windows/application.exe
+        run: aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/releases/1.0.0.${{ github.run_id }}.${{ github.run_number }}/windows/application.exe
       - name: upload to schema
-        run: aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/windows/schema.json
+        run: aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/releases/1.0.0.${{ github.run_id }}.${{ github.run_number }}/windows/schema.json

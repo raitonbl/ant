@@ -2,9 +2,9 @@ package lint
 
 import (
 	"fmt"
-	"github.com/raitonbl/cli/internal/commands/lint/lint_message"
-	"github.com/raitonbl/cli/internal/project"
-	"github.com/raitonbl/cli/internal/utils"
+	"github.com/raitonbl/ant/internal/commands/lint/lint_message"
+	"github.com/raitonbl/ant/internal/project"
+	"github.com/raitonbl/ant/internal/utils"
 	"github.com/thoas/go-funk"
 	"sort"
 )

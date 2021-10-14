@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/raitonbl/cli/cmd"
+	"github.com/raitonbl/ant/cmd"
 	"github.com/thatisuday/commando"
 )
 
