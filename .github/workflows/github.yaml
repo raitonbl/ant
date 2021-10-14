@@ -17,8 +17,11 @@ jobs:
         with:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
+        name: download dependencies
       - run: go build
-      - run: mv cli application
+        name: build binary
+      - run: mv cli linux
+        name: rename binary
       - name: Upload to S3
         uses: medlypharmacy/s3-artifacts-action@master
         with:
@@ -26,12 +29,12 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_s3_bucket_name: ${{ secrets.AWS_BUCKET }}
           aws_region: ${{ secrets.AWS_REGION }}
-          source_path: './application'
-          destination_path: "/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/linux"
+          source_path: './linux'
+          destination_path: "/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}"
           exclude_repo_from_destination_path: true
           resource_type: "FILE"
   macOS:
-    name: macOs
+    name: macos
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@master
@@ -39,16 +42,16 @@ jobs:
         with:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
+        name: download dependencies
       - run: go build
-      - run: mv cli application
-      - name: Upload to S3
-        uses: medlypharmacy/s3-artifacts-action@master
+        name: build binary
+      - run: mv cli macos
+        name: rename binary
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws_access_key_id: ${{ secrets.AWS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_s3_bucket_name: ${{ secrets.AWS_BUCKET }}
-          aws_region: ${{ secrets.AWS_REGION }}
-          source_path: './application'
-          destination_path: "/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/macOs"
-          exclude_repo_from_destination_path: true
-          resource_type: "FILE"
+          aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Deploy static site to S3 bucket
+        run: aws s3 sync ./macos s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}
