@@ -41,7 +41,7 @@ func doLintCommand(commandContext *CommandLintingContext, instance *project.Comm
 	}
 
 	if instance.Id != nil && cache[*instance.Id] != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", prefix), Message: lint_message.REPEATED_VALUE})
+		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", prefix), Message: lint_message.DUPLICATED_FIELD_VALUE})
 	}
 
 	if instance.Name == nil {
@@ -90,7 +90,7 @@ func doLintCommandConfiguration(commandContext *CommandLintingContext, instance 
 
 	problems = append(problems, array...)
 
-	array, err = doLintCommandParameters(commandContext, document, instance)
+	array, err = doLintCommandParameterSection(commandContext, document, instance)
 
 	if err != nil {
 		return nil, err

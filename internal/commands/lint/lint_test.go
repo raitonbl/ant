@@ -15,6 +15,10 @@ func TestLint_from_json_where_schema_has_refers_to(t *testing.T) {
 	doLintTest(t, "index-053.json")
 }
 
+func TestLint_from_yaml_where_multiple_args(t *testing.T) {
+	doLintTest(t, "index-058.yaml")
+}
+
 func TestLint_from_json_where_array_schema_has_refers_to(t *testing.T) {
 	doLintTest(t, "index-055.json")
 }

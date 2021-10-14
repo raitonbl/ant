@@ -1,6 +1,5 @@
 package project
 
-
 type In string
 
 const (

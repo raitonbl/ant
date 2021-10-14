@@ -3,7 +3,7 @@ package lint_message
 const (
 	UNRESOLVABLE_FIELD                          = "field is unresolvable"
 	BLANK_FIELD                                 = "field mustn't be blank"
-	REPEATED_VALUE                              = "value must be unique"
+	DUPLICATED_FIELD_VALUE                      = "value must be unique"
 	REQUIRED_FIELD                              = "field is required"
 	FIELD_NOT_ALLOWED                           = "field is not allowed"
 	FIELD_INDEX_GT_ZERO                         = "field must be greater than zero (0)"
@@ -21,4 +21,6 @@ const (
 	FIELD_MIN_ITEMS_GT_ZERO                     = "min-items cannot be lesser than zero (0)"
 	ARRAY_FIELD_TYPE_NOT_ALLOWED                = "type not allowed on array"
 	NOT_AVAILABLE_IN_USE                        = "not available since the value has been defined"
+	ARGS_INDEX_NOT_ORDERED                      = "arguments index must start in zero(0) and be sequential"
+	ARGS_INDEX_NOT_UNIQUE                       = "arguments index must be unique within the command"
 )
