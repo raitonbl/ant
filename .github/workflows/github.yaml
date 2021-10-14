@@ -11,6 +11,8 @@ jobs:
   build:
     name: linux
     runs-on: ubuntu-latest
+    env:
+      GITHUB_LABEL: SNAPSHOT
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -18,7 +20,7 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: go build
+      - run: ./build/build.sh
         name: build binary
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -34,6 +36,8 @@ jobs:
   macOS:
     name: macos
     runs-on: macos-latest
+    env:
+      GITHUB_LABEL: snapshot
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -41,7 +45,7 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: go build
+      - run: ./build/build.sh
         name: build binary
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -57,6 +61,8 @@ jobs:
   windows:
     name: windows
     runs-on: windows-latest
+    env:
+      GITHUB_LABEL: snapshot
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -64,9 +70,8 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: go build
+      - run: ./build/build.sh
         name: build binary
-      - run: ls
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

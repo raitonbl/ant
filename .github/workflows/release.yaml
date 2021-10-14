@@ -7,6 +7,8 @@ jobs:
   build:
     name: linux
     runs-on: ubuntu-latest
+    env:
+      GITHUB_LABEL: RELEASE
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -14,7 +16,7 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: go build
+      - run: ./build/build.sh
         name: build binary
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -30,6 +32,8 @@ jobs:
   macOS:
     name: macos
     runs-on: macos-latest
+    env:
+      GITHUB_LABEL: RELEASE
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -37,7 +41,7 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: go build
+      - run: ./build/build.sh
         name: build binary
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -53,6 +57,8 @@ jobs:
   windows:
     name: windows
     runs-on: windows-latest
+    env:
+      GITHUB_LABEL: RELEASE
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -60,7 +66,7 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: go build
+      - run: ./build/build.sh
         name: build binary
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -69,6 +75,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/releases/1.0.0.${{ github.run_id }}.${{ github.run_number }}/windows/application.exe
+        run: aws s3 cp ant.exe s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/releases/1.0.0.${{ github.run_id }}.${{ github.run_number }}/windows/application.exe
       - name: upload to schema
         run: aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/releases/1.0.0.${{ github.run_id }}.${{ github.run_number }}/windows/schema.json
