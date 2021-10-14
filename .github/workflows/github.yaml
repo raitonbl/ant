@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_LABEL: SNAPSHOT
+      S3_DIRECTORY: linux
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -29,16 +30,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: |
-          VERSION=$(cat "docs/version")
-          aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/$VERSION/linux/application
-          aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/$VERSION/linux/schema.json
+        run: ./build/publish.sh
 
   macOS:
     name: macos
     runs-on: macos-latest
     env:
-      GITHUB_LABEL: snapshot
+      GITHUB_LABEL: SNAPSHOT
+      S3_DIRECTORY: macos
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -55,16 +54,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: |
-            VERSION=$(cat "docs/version")
-            aws s3 cp ant s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/$VERSION/linux/application
-            aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/$VERSION/linux/schema.json
+        run: ./build/publish.sh
 
   windows:
     name: windows
     runs-on: windows-latest
     env:
-      GITHUB_LABEL: snapshot
+      GITHUB_LABEL: SNAPSHOT
+      S3_DIRECTORY: windows
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -81,6 +78,4 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: aws s3 cp ant.exe s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/windows/application.exe
-      - name: upload to schema
-        run: aws s3 cp internal/commands/lint/schema.json s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/ant/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/windows/schema.json
+        run: ./build/publish.sh
