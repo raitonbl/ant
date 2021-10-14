@@ -45,7 +45,7 @@ jobs:
         name: download dependencies
       - run: go build
         name: build binary
-      - run: mv cli macos
+      - run: mv cli ant
         name: rename binary
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
