@@ -89,4 +89,5 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
         run: |
-          aws s3 cp ant.exe s3://${{secrets.AWS_BUCKET}}/repositories/binaries/ant/$PROJECT_VERSION/$S3_DIRECTORY/ant.exe
+          $ver= Get-Content docs\version
+          aws s3 cp ant.exe s3://${{secrets.AWS_BUCKET}}/repositories/binaries/ant/$ver/$S3_DIRECTORY/ant.exe
