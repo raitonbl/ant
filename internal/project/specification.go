@@ -7,5 +7,5 @@ type Specification struct {
 	Description *string     `yaml:"description" json:"description,omitempty"`
 	Parameters  []Parameter `yaml:"parameters" json:"parameters,omitempty"`
 	Exit        []Exit      `yaml:"exit" json:"exit,omitempty"`
-	Schemas     []Schema    `yaml:"schemas" json:"schemas,omitempty"`
+	Schemas     []*Schema    `yaml:"schemas" json:"schemas,omitempty"`
 }

@@ -25,7 +25,7 @@ type LintContext struct {
 
 func doLintSchema(ctx *LintContext, schema *project.Schema) []Violation {
 
-	problems, skip := doLintResolvableSchema(ctx, schema)
+	problems, skip := doLintSchemaRefersTo(ctx, schema)
 
 	if skip {
 		return problems
@@ -60,7 +60,7 @@ func doLintSchema(ctx *LintContext, schema *project.Schema) []Violation {
 	return problems
 }
 
-func doLintResolvableSchema(ctx *LintContext, schema *project.Schema) ([]Violation, bool) {
+func doLintSchemaRefersTo(ctx *LintContext, schema *project.Schema) ([]Violation, bool) {
 	problems := make([]Violation, 0)
 
 	if schema.TypeOf == nil && schema.RefersTo == nil {
