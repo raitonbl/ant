@@ -72,10 +72,8 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: pwsh build/update-version.ps1
-        name: update version
-      - run: go build
-        name: build package  
+      - run: ./build/build.sh
+        name: build binary
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -83,4 +81,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: sh build/publish.sh
+        run: |
+            ver=`cat docs/version`
+            aws s3 cp ant.exe s3://$SECRET_AWS_BUCKET/repositories/binaries/ant/$ver/$S3_DIRECTORY/application
