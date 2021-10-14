@@ -73,8 +73,14 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: ./build/version.sh
-        name: update version
+      - name: update version
+        run: |
+          $ver=Get-Content docs\version
+          $id=(Get-Item env:\GITHUB_RUN_ID).value
+          $label=(Get-Item env:\GITHUB_LABEL).value
+          $number=(Get-Item env:\GITHUB_RUN_NUMBER).value
+          $ver=-join($ver,"-",$label,".",$id,".",$number)
+          $ver | Out-File -FilePath docs\version
       - run: go build
         name: build binary in demand
       - name: Configure AWS Credentials
@@ -84,4 +90,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: sh build/publish.sh
+        run: |
+          $ver= Get-Content docs\version
+          aws s3 cp ant.exe s3://${{secrets.AWS_BUCKET}}/repositories/binaries/ant/$ver/windows/ant.exe
