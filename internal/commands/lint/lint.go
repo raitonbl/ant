@@ -7,6 +7,7 @@ import (
 	"github.com/qri-io/jsonschema"
 	"github.com/raitonbl/cli/internal"
 	"github.com/raitonbl/cli/internal/project"
+	"sigs.k8s.io/yaml"
 	"strings"
 )
 
@@ -48,22 +49,36 @@ func Lint(context internal.ProjectContext) ([]Violation, error) {
 }
 
 func doLint(context internal.ProjectContext) ([]Violation, error) {
+
+	binary := make([]byte, 0)
 	problems := make([]Violation, 0)
 
 	if strings.HasSuffix(context.GetProjectFile().GetName(), ".json") {
-		array, err := doLintFile(context)
+		binary = context.GetProjectFile().GetContent()
+	} else if strings.HasSuffix(context.GetProjectFile().GetName(), ".yaml") || strings.HasSuffix(context.GetProjectFile().GetName(), ".yml") {
+		binary = context.GetProjectFile().GetContent()
+		content, err := yaml.YAMLToJSON(binary)
 
 		if err != nil {
 			return nil, err
 		}
 
-		if len(array) > 0 {
-			return array, nil
-		}
-
+		binary = content
+	} else {
+		return nil, internal.GetProblemFactory().GetProblem("the specified doesn't meet the expected extension[json|yaml|yml]")
 	}
 
-	array, err := doLintObject(context)
+	array, err := doLintFile(binary)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(array) > 0 {
+		return array, nil
+	}
+
+	array, err = doLintObject(context)
 
 	if err != nil {
 		return nil, err
@@ -72,10 +87,10 @@ func doLint(context internal.ProjectContext) ([]Violation, error) {
 	return append(problems, array...), nil
 }
 
-func doLintFile(ctx internal.ProjectContext) ([]Violation, error) {
+func doLintFile(binary []byte) ([]Violation, error) {
 	goContext := context.Background()
 
-	binary, err := resources.ReadFile("schema.json")
+	schema, err := resources.ReadFile("schema.json")
 
 	if err != nil {
 		return nil, internal.GetProblemFactory().GetProblem(err)
@@ -83,11 +98,11 @@ func doLintFile(ctx internal.ProjectContext) ([]Violation, error) {
 
 	rs := &jsonschema.Schema{}
 
-	if err = json.Unmarshal(binary, rs); err != nil {
+	if err := json.Unmarshal(schema, rs); err != nil {
 		return nil, internal.GetProblemFactory().GetProblem(err)
 	}
 
-	errs, err := rs.ValidateBytes(goContext, ctx.GetProjectFile().GetContent())
+	errs, err := rs.ValidateBytes(goContext, binary)
 
 	if err != nil {
 		return nil, internal.GetProblemFactory().GetProblem(err)

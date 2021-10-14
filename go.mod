@@ -10,4 +10,5 @@ require (
 	github.com/thatisuday/commando v1.0.4
 	github.com/thoas/go-funk v0.9.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	sigs.k8s.io/yaml v1.3.0
 )
