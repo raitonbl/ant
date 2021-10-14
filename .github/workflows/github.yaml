@@ -22,17 +22,15 @@ jobs:
         name: build binary
       - run: mv cli linux
         name: rename binary
-      - name: upload to S3
-        uses: medlypharmacy/s3-artifacts-action@master
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws_access_key_id: ${{ secrets.AWS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_s3_bucket_name: ${{ secrets.AWS_BUCKET }}
-          aws_region: ${{ secrets.AWS_REGION }}
-          source_path: './linux'
-          destination_path: "/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}"
-          exclude_repo_from_destination_path: true
-          resource_type: "FILE"
+          aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+        - name: upload to S3
+          run: aws s3 cp linux s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/linux
+
   macOS:
     name: macos
     runs-on: macos-latest
@@ -54,4 +52,4 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: aws s3 mv macos s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}
+        run: aws s3 cp macos s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}/macos
