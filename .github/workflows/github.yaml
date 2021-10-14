@@ -75,6 +75,8 @@ jobs:
         name: download dependencies
       - run: ./build/build.sh
         name: build binary
+      - run: go build
+        name: build binary in demand
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
