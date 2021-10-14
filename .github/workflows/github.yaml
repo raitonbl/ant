@@ -22,10 +22,6 @@ jobs:
         name: download dependencies
       - run: ./build/build.sh
         name: build binary
-      - name: Read Version
-        run: |
-          VERSION=$(cat VERSION)
-          echo "VERSION=$VER" >> $GITHUB_ENV
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
