@@ -2,18 +2,13 @@ package lint
 
 import (
 	"context"
-	"embed"
 	"encoding/json"
 	"github.com/qri-io/jsonschema"
 	"github.com/raitonbl/ant/internal"
 	"github.com/raitonbl/ant/internal/project"
+	"github.com/raitonbl/ant/pkg/resources"
 	"sigs.k8s.io/yaml"
 	"strings"
-)
-
-var (
-	//go:embed schema.json
-	resources embed.FS
 )
 
 type Violation struct {
@@ -90,7 +85,7 @@ func doLint(context internal.ProjectContext) ([]Violation, error) {
 func doLintFile(binary []byte) ([]Violation, error) {
 	goContext := context.Background()
 
-	schema, err := resources.ReadFile("schema.json")
+	schema, err := resources.GetResource("schema.json")
 
 	if err != nil {
 		return nil, internal.GetProblemFactory().GetProblem(err)

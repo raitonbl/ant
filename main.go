@@ -37,6 +37,7 @@ func main() {
 		SetAction(index)
 
 	cmd.AddLintCommand(registry)
+	cmd.AddExportCommand(registry)
 
 	registry.Parse(nil)
 }
