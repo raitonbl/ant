@@ -83,3 +83,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
         run: ./build/publish.sh
+        
