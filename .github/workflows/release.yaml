@@ -68,7 +68,7 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: ./build/build.sh
+      - run: sh build/build.sh
         name: build binary
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -77,4 +77,4 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: ./build/publish.sh
+        run: sh build/publish.sh
