@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 ver=`cat docs/version`
 

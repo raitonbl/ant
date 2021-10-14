@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 go test -short -coverprofile=bin/cov.out ./...
 
