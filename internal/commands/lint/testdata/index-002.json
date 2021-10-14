@@ -7,7 +7,7 @@
       "description": "allows to lint the specification in order to determine whether the specification.yaml is valid",
       "parameters": [
         {
-          "refers-to": "filename"
+          "refers-to": "stack"
         }
       ],
       "exit": [
@@ -29,9 +29,6 @@
           "description": "allows to build the cli project from the specification.yaml",
           "parameters": [
             {
-              "refers-to": "filename"
-            },
-            {
               "refers-to": "stack"
             }
           ]
@@ -40,9 +37,6 @@
           "name": "test",
           "description": "allows to build the test project from the specification.yaml",
           "parameters": [
-            {
-              "refers-to": "filename"
-            },
             {
               "refers-to": "stack"
             }

@@ -69,23 +69,15 @@
       "name": "stack",
       "description": "indicates the programming language which is used to generate the project",
       "schema": {
-        "enum": [
-          "java",
-          "python3",
-          "golang"
-        ],
-        "type": "string"
+        "refers-to": "language"
       }
     },
     {
-      "id": "parameter0",
-      "in": "flags",
-      "name": "stack",
-      "description": "indicates the programming language which is used to generate the project",
+      "id": "001",
+      "name": "001",
+      "description": "indicates the specification.yaml which will be ingested",
       "schema": {
-        "type": "array",
-        "items": {
-        }
+        "refers-to": "001"
       }
     }
   ],
@@ -94,6 +86,34 @@
       "code": 2,
       "id": "file-not-found",
       "message": "Input file not found"
+    }
+  ],
+  "schemas": [
+    {
+      "id": "language",
+      "enum": [
+        "java",
+        "python3",
+        "golang"
+      ],
+      "type": "string",
+      "examples": [
+        "java"
+      ]
+    },
+    {
+      "id": "001",
+      "type": "array",
+      "items": {
+        "refers-to": "002"
+      }
+    },
+    {
+      "id": "002",
+      "type": "array",
+      "items": {
+        "refers-to": "001"
+      }
     }
   ]
 }

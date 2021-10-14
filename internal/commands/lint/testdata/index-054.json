@@ -69,23 +69,7 @@
       "name": "stack",
       "description": "indicates the programming language which is used to generate the project",
       "schema": {
-        "enum": [
-          "java",
-          "python3",
-          "golang"
-        ],
-        "type": "string"
-      }
-    },
-    {
-      "id": "parameter0",
-      "in": "flags",
-      "name": "stack",
-      "description": "indicates the programming language which is used to generate the project",
-      "schema": {
-        "type": "array",
-        "items": {
-        }
+        "refers-to": "language0"
       }
     }
   ],
@@ -94,6 +78,20 @@
       "code": 2,
       "id": "file-not-found",
       "message": "Input file not found"
+    }
+  ],
+  "schemas": [
+    {
+      "id": "language",
+      "enum": [
+        "java",
+        "python3",
+        "golang"
+      ],
+      "type": "string",
+      "examples": [
+        "java"
+      ]
     }
   ]
 }

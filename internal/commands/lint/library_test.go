@@ -2,8 +2,6 @@ package lint
 
 import (
 	"fmt"
-	"github.com/raitonbl/cli/internal"
-	"testing"
 )
 
 func toString(each *Violation) string {
@@ -12,7 +10,7 @@ func toString(each *Violation) string {
 		return "nil"
 	}
 
-	return fmt.Sprintf("{\"path\":\"%s\" , \"message\":\"%s\" , \"type\": \"%s\"}", each.Path, each.Message, each.Type)
+	return fmt.Sprintf("{\"path\":\"%s\" , \"message\":\"%s\"}", each.Path, each.Message)
 }
 
 func toText(array []Violation) string {
@@ -38,27 +36,4 @@ func toText(array []Violation) string {
 	text += "]"
 
 	return text
-}
-
-func doLintFile(t *testing.T, filename string, when Moment, instance Linter, afterLint func(array []Violation)) {
-
-	ctx, err := internal.GetContext(fmt.Sprintf("testdata/%s", filename))
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	document, err := ctx.GetDocument()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	array, err := instance.Lint(ctx, document, when)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	afterLint(array)
 }
