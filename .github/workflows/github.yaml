@@ -22,8 +22,10 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: ./build/build.sh
-        name: build binary
+      - run: ./build/version.sh
+        name: update version
+      - run: go build
+        name: build binary in demand
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -47,8 +49,10 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: ./build/build.sh
-        name: build binary
+      - run: ./build/version.sh
+        name: update version
+      - run: go build
+        name: build binary in demand
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -73,8 +77,8 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: ./build/build.sh
-        name: build binary
+      - run: ./build/version.sh
+        name: update version
       - run: go build
         name: build binary in demand
       - name: Configure AWS Credentials
@@ -85,4 +89,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
         run: |
-          aws s3 cp ant.exe s3://$SECRET_AWS_BUCKET/repositories/binaries/ant/$PROJECT_VERSION/$S3_DIRECTORY/ant.exe
+          aws s3 cp ant.exe s3://${{secrets.AWS_BUCKET}}/repositories/binaries/ant/$PROJECT_VERSION/$S3_DIRECTORY/ant.exe

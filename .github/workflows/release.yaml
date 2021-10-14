@@ -18,8 +18,10 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: ./build/build.sh
-        name: build binary
+      - run: ./build/version.sh
+        name: update version
+      - run: go build
+        name: build binary in demand
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -43,8 +45,10 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: ./build/build.sh
-        name: build binary
+      - run: ./build/version.sh
+        name: update version
+      - run: go build
+        name: build binary in demand
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -69,8 +73,10 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: sh build/build.sh
-        name: build binary
+      - run: ./build/version.sh
+        name: update version
+      - run: go build
+        name: build binary in demand
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
