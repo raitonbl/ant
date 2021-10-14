@@ -4,7 +4,7 @@ on:
     branches: develop
 jobs:
   deploy:
-    name: build
+    name: linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
