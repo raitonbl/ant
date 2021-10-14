@@ -39,6 +39,7 @@ jobs:
     env:
       GITHUB_LABEL: SNAPSHOT
       S3_DIRECTORY: macos
+      S3_FILE: ant.exe
       SECRET_AWS_BUCKET: ${{ secrets.AWS_BUCKET  }}
     steps:
       - uses: actions/checkout@master
@@ -81,6 +82,4 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: upload to S3
-        run: |
-            ver=`cat docs/version`
-            aws s3 cp ant.exe s3://$SECRET_AWS_BUCKET/repositories/binaries/ant/$ver/$S3_DIRECTORY/application
+        run: ./build/publish.sh
