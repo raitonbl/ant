@@ -22,7 +22,7 @@ jobs:
         name: build binary
       - run: mv cli linux
         name: rename binary
-      - name: Upload to S3
+      - name: upload to S3
         uses: medlypharmacy/s3-artifacts-action@master
         with:
           aws_access_key_id: ${{ secrets.AWS_KEY_ID }}
@@ -45,6 +45,8 @@ jobs:
         name: download dependencies
       - run: go build
         name: build binary
+      - run: mkdir s3
+        name: create s3 directory
       - run: mv cli macos
         name: rename binary
       - name: Configure AWS Credentials
@@ -53,5 +55,5 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: Deploy static site to S3 bucket
-        run: aws s3 sync ./macos s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}
+      - name: upload to S3
+        run: aws s3 sync ./s3 s3://${{ secrets.AWS_BUCKET }}/repositories/binaries/cli/snapshots/1.0.0.${{ github.run_id }}.${{ github.run_number }}
