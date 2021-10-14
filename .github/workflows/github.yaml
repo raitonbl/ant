@@ -72,8 +72,8 @@ jobs:
           go-version: '1.16.5' # The Go version to download (if necessary) and use.
       - run: go mod tidy
         name: download dependencies
-      - run: update version
-        name: pwsh build/update-version.ps1
+      - run: pwsh build/update-version.ps1
+        name: update version
       - run: go build
         name: build package  
       - name: Configure AWS Credentials
