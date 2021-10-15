@@ -31,7 +31,7 @@ jobs:
       - name: upload release
         run: ./build/publish.sh
       - name: upload latest
-        run: aws s3 cp $filename s3://$SECRET_AWS_BUCKET/repositories/binaries/ant/latest/$S3_DIRECTORY/$filename
+        run: aws s3 cp ant s3://$SECRET_AWS_BUCKET/repositories/binaries/ant/latest/$S3_DIRECTORY/$filename
 
   macOS:
     name: macos
@@ -60,7 +60,7 @@ jobs:
       - name: upload release
         run: ./build/publish.sh
       - name: upload latest
-        run: aws s3 cp $filename s3://$SECRET_AWS_BUCKET/repositories/binaries/ant/latest/$S3_DIRECTORY/$filename
+        run: aws s3 cp ant s3://$SECRET_AWS_BUCKET/repositories/binaries/ant/latest/$S3_DIRECTORY/$filename
 
   windows:
     name: windows
