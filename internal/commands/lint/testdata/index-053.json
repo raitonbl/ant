@@ -1,0 +1,97 @@
+{
+  "name": "cli",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "lint",
+      "description": "allows to lint the specification in order to determine whether the specification.yaml is valid",
+      "parameters": [
+        {
+          "refers-to": "filename"
+        }
+      ],
+      "exit": [
+        {
+          "code": 1,
+          "message": "Unexpected behaviour"
+        },
+        {
+          "refers-to": "file-not-found"
+        }
+      ]
+    },
+    {
+      "name": "build",
+      "description": "allows to build the cli project for coding or testing",
+      "commands": [
+        {
+          "name": "stack",
+          "description": "allows to build the cli project from the specification.yaml",
+          "parameters": [
+            {
+              "refers-to": "filename"
+            },
+            {
+              "refers-to": "stack"
+            }
+          ]
+        },
+        {
+          "name": "test",
+          "description": "allows to build the test project from the specification.yaml",
+          "parameters": [
+            {
+              "refers-to": "filename"
+            },
+            {
+              "refers-to": "stack"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "description": "application that allows an CLI to be built or to build test starting from a specification",
+  "parameters": [
+    {
+      "id": "filename",
+      "in": "arguments",
+      "index": 0,
+      "name": "filename",
+      "description": "indicates the specification.yaml which will be ingested",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "stack",
+      "in": "flags",
+      "name": "stack",
+      "description": "indicates the programming language which is used to generate the project",
+      "schema": {
+        "refers-to": "language"
+      }
+    }
+  ],
+  "exit": [
+    {
+      "code": 2,
+      "id": "file-not-found",
+      "message": "Input file not found"
+    }
+  ],
+  "schemas": [
+    {
+      "id": "language",
+      "enum": [
+        "java",
+        "python3",
+        "golang"
+      ],
+      "type": "string",
+      "examples": [
+        "java"
+      ]
+    }
+  ]
+}
