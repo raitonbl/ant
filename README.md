@@ -13,11 +13,26 @@ PS: The current version of the CLI only supports the 1st capability.
 
 ## Installation
 
+To install ant CLI on MacOS follow the bellow steps:
 ```sh
-yarn add command-line-application
-# or
-npm i --save command-line-application
+
+curl https://6bb12648-d43f-4d95-96b0-ba372f59604b.s3.eu-west-1.amazonaws.com/repositories/binaries/ant/$ANT_VERSION/macos/ant --output ant
+chmod u+x ant
+mv ant /usr/local/bin/ant
 ```
+
+To install ant CLI on Linux follow the bellow steps:
+```sh
+
+curl https://6bb12648-d43f-4d95-96b0-ba372f59604b.s3.eu-west-1.amazonaws.com/repositories/binaries/ant/$ANT_VERSION/linux/ant --output ant
+chmod u+x ant
+mv ant /usr/local/bin/ant
+```
+
+To install ant CLI on Windows follow the bellow steps:
+- Download the binary  on https://6bb12648-d43f-4d95-96b0-ba372f59604b.s3.eu-west-1.amazonaws.com/repositories/binaries/ant/$ANT_VERSION/windows/ant.exe
+
+PS: the **$ANT_VERSION** environment in the examples should be replaced by an actual version, being the recommended version **latest**.
 
 ## Usage
 The current version of ant CLI defines two (2) commands which are:
