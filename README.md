@@ -3,7 +3,7 @@
 CLI application that manipulates **ant cli specification document**. 
 <br/>The **ant CLI specification document** is a file that describes a cli application interface.
 
-The ant CLI has four (4) essential capabilities which are:
+The ant CLI has four (4) capabilities in mind , which are:
 - Lint an ant CLI specification document represented inm **json** or **yaml** format
 - Generate the CLI project from an ant CLI specification document
 - Generate the integration test project from an ant CLI specification document
