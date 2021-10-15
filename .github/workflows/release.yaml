@@ -28,8 +28,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: upload to S3
+      - name: upload release
         run: ./build/publish.sh
+      - name: upload latest
+        run: aws s3 cp $filename s3://$SECRET_AWS_BUCKET/repositories/binaries/ant/latest/$S3_DIRECTORY/$filename
 
   macOS:
     name: macos
@@ -55,8 +57,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: upload to S3
+      - name: upload release
         run: ./build/publish.sh
+      - name: upload latest
+        run: aws s3 cp $filename s3://$SECRET_AWS_BUCKET/repositories/binaries/ant/latest/$S3_DIRECTORY/$filename
 
   windows:
     name: windows
@@ -93,3 +97,4 @@ jobs:
         run: |
           $ver= Get-Content docs\version
           aws s3 cp ant.exe s3://${{secrets.AWS_BUCKET}}/repositories/binaries/ant/$ver/windows/ant.exe
+          aws s3 cp ant.exe s3://${{secrets.AWS_BUCKET}}/repositories/binaries/ant/latest/windows/ant.exe
