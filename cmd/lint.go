@@ -36,12 +36,13 @@ func doLint(args map[string]commando.ArgValue, _ map[string]commando.FlagValue) 
 
 		txt := ""
 		for index, each := range problems {
-			txt += fmt.Sprintf("%d.path:%s\n lint_message:%s", index, each.Path, each.Message)
+			txt += fmt.Sprintf("%d.path:%s\n message:%s", index, each.Path, each.Message)
 		}
 
-		fmt.Print(txt)
+		fmt.Println(txt)
+		fmt.Println("Document isn't valid")
 		os.Exit(2)
 	}
 
-	fmt.Printf("File{\"uri\":\"%s\"} has been successfully validated", uri)
+	fmt.Println("Document is valid")
 }

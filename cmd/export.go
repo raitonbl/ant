@@ -31,22 +31,13 @@ func export(args map[string]commando.ArgValue, flags map[string]commando.FlagVal
 func doExportSchema(args map[string]commando.ArgValue, _ map[string]commando.FlagValue) {
 	path := args["file"].Value
 
-	binary, err := resources.GetResource("schema.json")
+	binary, _ := resources.GetResource("schema.json")
+
+	err := os.WriteFile(path, binary, 0644)
 
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if path == "" {
-		fmt.Println(string(binary))
-		return
-	}
-
-	err = os.WriteFile(path, binary, 0644)
-
-	if err != nil {
-		fmt.Println(err)
+		fmt.Println("unexpected problem occurred")
 		os.Exit(1)
 		return
 	}

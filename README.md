@@ -9,7 +9,7 @@ The ant CLI has four (4) essential capabilities which are:
 - Generate the integration test project from an ant CLI specification document
 - Generate an HTML document that describes an CLI from the ant CLI specification document
 
-PS: The current version of the CLI only supports the first capability.
+PS: The current version of the CLI only supports the 1st capability.
 
 ## Installation
 
@@ -43,3 +43,126 @@ The current version can only export schema as **object-type** , as shown bellow:
     ant export schema [path-to-file]
 ```
 The argument **path-to-file** specifies where the schema is exported to. In case the argument isn't specified, the CLI assumes schema.json.
+
+
+## document example
+ant CLI document that describe the CLI tool in yaml format:
+```yaml
+name: ant
+version: 1.0.0
+description: manipulates ant cli specification document
+commands:
+  - name: lint
+    description: >-
+      allows the validation of an CLI specification file
+    parameters:
+      - in: arguments
+        name: path-to-file
+        description: the CLI specification file URI
+        schema:
+            type: string
+    exit:
+      - code: 0
+        message: Document is valid
+      - code: 1
+        message: unexpected problem occurred
+      - code: 2
+        message: Document isn't valid
+  - name: export
+    description: exports an ant object
+    parameters:
+      - in: arguments
+        index: 0
+        name: object-type
+        description: the CLI specification file URI
+        schema:
+          type: string
+          enum:
+            - schema
+      - in: arguments
+        index: 1
+        name: path-to-file
+        description: path to the file to export to
+        schema:
+          type: string
+    exit:
+      - code: 0
+        message: Successfully exported
+      - code: 1
+        message: unexpected problem occurred
+```
+ant CLI document that describe the CLI tool in json format:
+```json
+{
+  "name": "ant",
+  "version": "1.0.0",
+  "description": "manipulates ant cli specification document",
+  "commands": [
+    {
+      "name": "lint",
+      "description": "allows the validation of an CLI specification file",
+      "parameters": [
+        {
+          "in": "arguments",
+          "name": "path-to-file",
+          "description": "the CLI specification file URI",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "exit": [
+        {
+          "code": 0,
+          "message": "Document is valid"
+        },
+        {
+          "code": 1,
+          "message": "unexpected problem occurred"
+        },
+        {
+          "code": 2,
+          "message": "Document isn't valid"
+        }
+      ]
+    },
+    {
+      "name": "export",
+      "description": "exports an ant object",
+      "parameters": [
+        {
+          "in": "arguments",
+          "index": 0,
+          "name": "object-type",
+          "description": "the CLI specification file URI",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "schema"
+            ]
+          }
+        },
+        {
+          "in": "arguments",
+          "index": 1,
+          "name": "path-to-file",
+          "description": "path to the file to export to",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "exit": [
+        {
+          "code": 0,
+          "message": "Successfully exported"
+        },
+        {
+          "code": 1,
+          "message": "unexpected problem occurred"
+        }
+      ]
+    }
+  ]
+}
+```
