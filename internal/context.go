@@ -9,7 +9,7 @@ import (
 
 type ProjectContext interface {
 	GetProjectFile() *File
-	GetDocument() (*project.Specification, error)
+	GetDocument() (*project.CliObject, error)
 }
 
 func GetContext(filename string) (ProjectContext, error) {
@@ -24,15 +24,15 @@ func GetContext(filename string) (ProjectContext, error) {
 
 type DefaultContext struct {
 	projectFile       *File
-	processedDocument *project.Specification
-	document          *project.Specification
+	processedDocument *project.CliObject
+	document          *project.CliObject
 }
 
 func (instance *DefaultContext) GetProjectFile() *File {
 	return instance.projectFile
 }
 
-func (instance *DefaultContext) GetDocument() (*project.Specification, error) {
+func (instance *DefaultContext) GetDocument() (*project.CliObject, error) {
 
 	if instance.document != nil {
 		return instance.document, nil
@@ -57,13 +57,13 @@ func (instance *DefaultContext) GetDocument() (*project.Specification, error) {
 	return parseYaml(binary)
 }
 
-func parseYaml(binary []byte) (*project.Specification, error) {
+func parseYaml(binary []byte) (*project.CliObject, error) {
 
 	if binary == nil {
 		return nil, GetProblemFactory().GetUnexpectedContext()
 	}
 
-	descriptor := project.Specification{}
+	descriptor := project.CliObject{}
 	err := yaml.Unmarshal(binary, &descriptor)
 
 	if err != nil {
@@ -73,13 +73,13 @@ func parseYaml(binary []byte) (*project.Specification, error) {
 	return &descriptor, err
 }
 
-func parseJson(binary []byte) (*project.Specification, error) {
+func parseJson(binary []byte) (*project.CliObject, error) {
 
 	if binary == nil {
 		return nil, GetProblemFactory().GetUnexpectedContext()
 	}
 
-	descriptor := project.Specification{}
+	descriptor := project.CliObject{}
 	err := json.Unmarshal(binary, &descriptor)
 
 	if err != nil {

@@ -7,9 +7,9 @@ import (
 	"github.com/raitonbl/ant/internal/utils"
 )
 
-func doLintExitSection(document *project.Specification) (map[string]*project.Exit, []Violation, error) {
+func doLintExitSection(document *project.CliObject) (map[string]*project.ExitObject, []Violation, error) {
 	problems := make([]Violation, 0)
-	cache := make(map[string]*project.Exit)
+	cache := make(map[string]*project.ExitObject)
 
 	if document.Exit == nil {
 		return cache, problems, nil
@@ -37,7 +37,7 @@ func doLintExitSection(document *project.Specification) (map[string]*project.Exi
 	return cache, problems, nil
 }
 
-func doLintCommandExitSection(commandContext *CommandLintingContext, document *project.Specification, instance *project.Command) ([]Violation, error) {
+func doLintCommandExitSection(commandContext *CommandLintingContext, document *project.CliObject, instance *project.CommandObject) ([]Violation, error) {
 
 	problems := make([]Violation, 0)
 
@@ -56,7 +56,7 @@ func doLintCommandExitSection(commandContext *CommandLintingContext, document *p
 	return problems, nil
 }
 
-func doLintCommandExit(commandContext *CommandLintingContext, document *project.Specification, index int, each project.Exit) ([]Violation, error) {
+func doLintCommandExit(commandContext *CommandLintingContext, document *project.CliObject, index int, each project.ExitObject) ([]Violation, error) {
 
 	prefix := commandContext.path
 	problems := make([]Violation, 0)
@@ -91,7 +91,7 @@ func doLintCommandExit(commandContext *CommandLintingContext, document *project.
 	return problems, nil
 }
 
-func isExitReference(each *project.Exit) bool {
+func isExitReference(each *project.ExitObject) bool {
 
 	if each.Id != nil {
 		return false

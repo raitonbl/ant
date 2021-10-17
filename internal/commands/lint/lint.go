@@ -18,9 +18,9 @@ type Violation struct {
 
 type CommandLintingContext struct {
 	path           string
-	commandCache   map[string]*project.Command
-	exitCache      map[string]*project.Exit
-	parameterCache map[string]*project.Parameter
+	commandCache   map[string]*project.CommandObject
+	exitCache      map[string]*project.ExitObject
+	parameterCache map[string]*project.ParameterObject
 	schemaCache    map[string]*project.Schema
 }
 

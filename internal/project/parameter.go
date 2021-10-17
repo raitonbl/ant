@@ -7,7 +7,7 @@ const (
 	Arguments In = "arguments"
 )
 
-type Parameter struct {
+type ParameterObject struct {
 	Id           *string `yaml:"id" json:"id,omitempty"`
 	In           *In     `yaml:"in" json:"in,omitempty"`
 	Index        *int    `yaml:"index" json:"index,omitempty"`
@@ -20,8 +20,8 @@ type Parameter struct {
 	Schema       *Schema `yaml:"schema" json:"schema,omitempty"`
 }
 
-func (instance Parameter) Clone() *Parameter {
-	object := Parameter{}
+func (instance *ParameterObject) Clone() *ParameterObject {
+	object := ParameterObject{}
 
 	if instance.Id != nil {
 		object.Id = instance.Id

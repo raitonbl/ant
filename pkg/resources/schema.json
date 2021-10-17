@@ -3,19 +3,23 @@
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "The name the CLI application"
     },
     "version": {
-      "type": "string"
+      "type": "string",
+      "description": "The version of the CLI application"
     },
     "commands": {
       "type": "array",
+      "description": "An array of CommandObject, which describes capabilities of the CLI application",
       "items": {
         "$ref": "#/$defs/command"
       }
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "The summary of the CLI application intent"
     },
     "parameters": {
       "type": "array",
@@ -118,22 +122,27 @@
       "additionalProperties": false,
       "properties": {
         "code": {
-          "type": "integer"
+          "type": "integer",
+          "description": "the exit code returned by the CLI command"
         },
         "message": {
-          "type": "string"
+          "type": "string",
+          "description": "the exit message returned by the CLI command"
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "the exit summary of the intent"
         }
       }
     },
     "command": {
       "type": "object",
+      "description": "Describes a CLI command",
       "additionalProperties": false,
       "properties": {
         "id": {
-          "type": "string"
+          "type": "string",
+          "description": "Unique identifier that identifies the command"
         },
         "name": {
           "type": "string"
@@ -143,6 +152,7 @@
         },
         "parameters": {
           "type": "array",
+          "description": "describes expected parameters for the CLI command",
           "items": {
             "oneOf": [
               {
@@ -167,6 +177,7 @@
         },
         "exit": {
           "type": "array",
+          "description": "describes expected exit's for the CLI command",
           "items": {
             "oneOf": [
               {
