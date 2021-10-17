@@ -1,6 +1,6 @@
 package project
 
-type Exit struct {
+type ExitObject struct {
 	Code        *int    `yaml:"code" json:"code,omitempty"`
 	Message     *string `yaml:"message" json:"message,omitempty"`
 	Id          *string `yaml:"id" json:"id,omitempty"`

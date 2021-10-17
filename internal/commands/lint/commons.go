@@ -19,7 +19,7 @@ const (
 
 type LintContext struct {
 	prefix   string
-	document *project.Specification
+	document *project.CliObject
 	schemas  map[string]*project.Schema
 }
 
@@ -245,7 +245,7 @@ func doLintArraySchemaLength(ctx *LintContext, schema *project.Schema, typeOf pr
 	return problems
 }
 
-func doLintParameter(ctx *LintContext, parameter *project.Parameter) ([]Violation, error) {
+func doLintParameter(ctx *LintContext, parameter *project.ParameterObject) ([]Violation, error) {
 
 	schema := parameter.Schema
 	problems := make([]Violation, 0)
@@ -272,7 +272,7 @@ func doLintParameter(ctx *LintContext, parameter *project.Parameter) ([]Violatio
 	return problems, nil
 }
 
-func doLintParameterFields(ctx *LintContext, parameter *project.Parameter) []Violation {
+func doLintParameterFields(ctx *LintContext, parameter *project.ParameterObject) []Violation {
 	problems := make([]Violation, 0)
 
 	if parameter == nil {
@@ -310,7 +310,7 @@ func doLintParameterFields(ctx *LintContext, parameter *project.Parameter) []Vio
 	return problems
 }
 
-func doLintParameterSchema(ctx *LintContext, parameter *project.Parameter) ([]Violation, error) {
+func doLintParameterSchema(ctx *LintContext, parameter *project.ParameterObject) ([]Violation, error) {
 
 	problems := make([]Violation, 0)
 
@@ -326,7 +326,7 @@ func doLintParameterSchema(ctx *LintContext, parameter *project.Parameter) ([]Vi
 	return problems, nil
 }
 
-func doLintExit(ctx *LintContext, exit *project.Exit) ([]Violation, error) {
+func doLintExit(ctx *LintContext, exit *project.ExitObject) ([]Violation, error) {
 	problems := make([]Violation, 0)
 
 	if exit.Message == nil || utils.IsBlank(*exit.Message) {

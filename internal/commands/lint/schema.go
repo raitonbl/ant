@@ -8,7 +8,7 @@ import (
 	"github.com/thoas/go-funk"
 )
 
-func doLintSchemaSection(document *project.Specification) (map[string]*project.Schema, []Violation, error) {
+func doLintSchemaSection(document *project.CliObject) (map[string]*project.Schema, []Violation, error) {
 	problems := make([]Violation, 0)
 	cache := make(map[string]*project.Schema)
 

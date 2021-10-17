@@ -10,14 +10,14 @@ import (
 )
 
 type CommandCacheContext struct {
-	args       map[string]*project.Parameter
-	flags      map[string]*project.Parameter
-	shortForms map[string]*project.Parameter
+	args       map[string]*project.ParameterObject
+	flags      map[string]*project.ParameterObject
+	shortForms map[string]*project.ParameterObject
 }
 
-func doLintParameterSection(document *project.Specification, schemaCache map[string]*project.Schema) (map[string]*project.Parameter, []Violation, error) {
+func doLintParameterSection(document *project.CliObject, schemaCache map[string]*project.Schema) (map[string]*project.ParameterObject, []Violation, error) {
 	problems := make([]Violation, 0)
-	cache := make(map[string]*project.Parameter)
+	cache := make(map[string]*project.ParameterObject)
 
 	if document.Parameters == nil {
 		return cache, problems, nil
@@ -52,7 +52,7 @@ func doLintParameterSection(document *project.Specification, schemaCache map[str
 	return cache, problems, nil
 }
 
-func doLintCommandParameterSection(commandContext *CommandLintingContext, document *project.Specification, instance *project.Command) ([]Violation, error) {
+func doLintCommandParameterSection(commandContext *CommandLintingContext, document *project.CliObject, instance *project.CommandObject) ([]Violation, error) {
 
 	prefix := commandContext.path
 	problems := make([]Violation, 0)
@@ -71,12 +71,12 @@ func doLintCommandParameterSection(commandContext *CommandLintingContext, docume
 	return problems, nil
 }
 
-func doLintCommandParameters(commandContext *CommandLintingContext, instance *project.Command, prefix string, document *project.Specification) ([]Violation, error) {
+func doLintCommandParameters(commandContext *CommandLintingContext, instance *project.CommandObject, prefix string, document *project.CliObject) ([]Violation, error) {
 
 	problems := make([]Violation, 0)
-	args := make(map[string]*project.Parameter)
-	flags := make(map[string]*project.Parameter)
-	shortForms := make(map[string]*project.Parameter)
+	args := make(map[string]*project.ParameterObject)
+	flags := make(map[string]*project.ParameterObject)
+	shortForms := make(map[string]*project.ParameterObject)
 	cacheContext := &CommandCacheContext{args: args, flags: flags, shortForms: shortForms}
 
 	for index, each := range instance.Parameters {
@@ -98,7 +98,7 @@ func doLintCommandParameters(commandContext *CommandLintingContext, instance *pr
 	return problems, nil
 }
 
-func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintContext, cacheContext *CommandCacheContext, each *project.Parameter) ([]Violation, error) {
+func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintContext, cacheContext *CommandCacheContext, each *project.ParameterObject) ([]Violation, error) {
 	args := cacheContext.args
 	flags := cacheContext.flags
 	shortForms := cacheContext.shortForms
@@ -138,7 +138,7 @@ func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintCont
 	return append(problems, array...), nil
 }
 
-func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *LintContext, each project.Parameter) ([]Violation, bool, *project.Parameter) {
+func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *LintContext, each project.ParameterObject) ([]Violation, bool, *project.ParameterObject) {
 	param := &each
 	skipLintParameter := false
 	problems := make([]Violation, 0)
@@ -173,7 +173,7 @@ func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *
 	return problems, skipLintParameter, param
 }
 
-func doLintCommandParameterInFlags(ctx *LintContext, param *project.Parameter, flags map[string]*project.Parameter, shortForms map[string]*project.Parameter) []Violation {
+func doLintCommandParameterInFlags(ctx *LintContext, param *project.ParameterObject, flags map[string]*project.ParameterObject, shortForms map[string]*project.ParameterObject) []Violation {
 	problems := make([]Violation, 0)
 
 	if param.Name != nil && flags[*param.Name] != nil {
@@ -191,9 +191,9 @@ func doLintCommandParameterInFlags(ctx *LintContext, param *project.Parameter, f
 	return problems
 }
 
-func doLintCommandParameterInArguments(ctx *LintContext, args map[string]*project.Parameter) []Violation {
+func doLintCommandParameterInArguments(ctx *LintContext, args map[string]*project.ParameterObject) []Violation {
 	problems := make([]Violation, 0)
-	seq := make([]*project.Parameter, 0)
+	seq := make([]*project.ParameterObject, 0)
 
 	for _, value := range args {
 		if value.Index != nil {
@@ -219,7 +219,7 @@ func doLintCommandParameterInArguments(ctx *LintContext, args map[string]*projec
 	return problems
 }
 
-func isParameterReference(each *project.Parameter) bool {
+func isParameterReference(each *project.ParameterObject) bool {
 
 	if each.Id != nil {
 		return false
@@ -260,7 +260,7 @@ func isParameterReference(each *project.Parameter) bool {
 	return true
 }
 
-type ArgParameter []*project.Parameter
+type ArgParameter []*project.ParameterObject
 
 func (s ArgParameter) Len() int {
 	return len(s)

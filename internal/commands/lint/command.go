@@ -7,9 +7,9 @@ import (
 	"github.com/raitonbl/ant/internal/utils"
 )
 
-func doLintCommandSection(document *project.Specification, parameterCache map[string]*project.Parameter, exitCache map[string]*project.Exit, schemas map[string]*project.Schema) ([]Violation, error) {
+func doLintCommandSection(document *project.CliObject, parameterCache map[string]*project.ParameterObject, exitCache map[string]*project.ExitObject, schemas map[string]*project.Schema) ([]Violation, error) {
 	problems := make([]Violation, 0)
-	cache := make(map[string]*project.Command)
+	cache := make(map[string]*project.CommandObject)
 
 	if document.Subcommands == nil {
 		return problems, nil
@@ -30,7 +30,7 @@ func doLintCommandSection(document *project.Specification, parameterCache map[st
 	return problems, nil
 }
 
-func doLintCommand(commandContext *CommandLintingContext, instance *project.Command, document *project.Specification) ([]Violation, error) {
+func doLintCommand(commandContext *CommandLintingContext, instance *project.CommandObject, document *project.CliObject) ([]Violation, error) {
 
 	cache := commandContext.commandCache
 	prefix := commandContext.path
@@ -77,7 +77,7 @@ func doLintCommand(commandContext *CommandLintingContext, instance *project.Comm
 	return append(problems, array...), nil
 }
 
-func doLintCommandConfiguration(commandContext *CommandLintingContext, instance *project.Command, document *project.Specification) ([]Violation, error) {
+func doLintCommandConfiguration(commandContext *CommandLintingContext, instance *project.CommandObject, document *project.CliObject) ([]Violation, error) {
 
 	cache := commandContext.commandCache
 	problems := make([]Violation, 0)
@@ -111,7 +111,7 @@ func doLintCommandConfiguration(commandContext *CommandLintingContext, instance 
 	return append(problems, array...), nil
 }
 
-func doLintSubcommands(commandContext *CommandLintingContext, document *project.Specification, instance *project.Command) ([]Violation, error) {
+func doLintSubcommands(commandContext *CommandLintingContext, document *project.CliObject, instance *project.CommandObject) ([]Violation, error) {
 	cache := commandContext.commandCache
 	prefix := commandContext.path
 	exitCache := commandContext.exitCache
