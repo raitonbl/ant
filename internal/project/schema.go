@@ -1,8 +1,6 @@
 package project
 
 type Schema struct {
-	Id *string `yaml:"id" json:"id,omitempty"`
-
 	// applies to number
 	MultipleOf *int `yaml:"multiple-of" json:"multiple-of,omitempty"`
 	Maximum    *int `yaml:"maximum" json:"maximum,omitempty"`

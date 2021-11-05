@@ -52,57 +52,54 @@
     }
   ],
   "description": "application that allows an CLI to be built or to build test starting from a specification",
-  "parameters": [
-    {
-      "id": "filename",
-      "in": "arguments",
-      "index": 0,
-      "name": "filename",
-      "description": "indicates the specification.yaml which will be ingested",
-      "schema": {
-        "type": "string"
+  "components": {
+    "exits": {
+      "file-not-found": {
+        "code": 2,
+        "message": "Input file not found"
       }
     },
-    {
-      "id": "stack",
-      "in": "flags",
-      "name": "stack",
-      "description": "indicates the programming language which is used to generate the project",
-      "schema": {
-        "refers-to": "language"
+    "schemas": {
+      "language": {
+        "enum": [
+          "java",
+          "python3",
+          "golang"
+        ],
+        "type": "string",
+        "examples": [
+          "java"
+        ]
       }
     },
-    {
-      "id": "001",
-      "name": "001",
-      "description": "indicates the specification.yaml which will be ingested",
-      "schema": {
-        "type": "array",
-        "items": {
+    "parameters": {
+      "filename": {
+        "in": "arguments",
+        "index": 0,
+        "name": "filename",
+        "description": "indicates the specification.yaml which will be ingested",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "stack": {
+        "in": "flags",
+        "name": "stack",
+        "description": "indicates the programming language which is used to generate the project",
+        "schema": {
           "refers-to": "language"
+        }
+      },
+      "001": {
+        "name": "001",
+        "description": "indicates the specification.yaml which will be ingested",
+        "schema": {
+          "type": "array",
+          "items": {
+            "refers-to": "language"
+          }
         }
       }
     }
-  ],
-  "exit": [
-    {
-      "code": 2,
-      "id": "file-not-found",
-      "message": "Input file not found"
-    }
-  ],
-  "schemas": [
-    {
-      "id": "language",
-      "enum": [
-        "java",
-        "python3",
-        "golang"
-      ],
-      "type": "string",
-      "examples": [
-        "java"
-      ]
-    }
-  ]
+  }
 }

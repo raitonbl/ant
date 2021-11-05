@@ -17,11 +17,8 @@ type Violation struct {
 }
 
 type CommandLintingContext struct {
-	path           string
-	commandCache   map[string]*project.CommandObject
-	exitCache      map[string]*project.ExitObject
-	parameterCache map[string]*project.ParameterObject
-	schemaCache    map[string]*project.Schema
+	path         string
+	commandCache map[string]*project.CommandObject
 }
 
 func Lint(context internal.ProjectContext) ([]Violation, error) {
@@ -126,7 +123,7 @@ func doLintObject(ctx internal.ProjectContext) ([]Violation, error) {
 
 	problems := make([]Violation, 0)
 
-	schemaCache, array, err := doLintSchemaSection(document)
+	array, err := doLintSchemaSection(document)
 
 	if err != nil {
 		return nil, err
@@ -134,11 +131,11 @@ func doLintObject(ctx internal.ProjectContext) ([]Violation, error) {
 
 	problems = append(problems, array...)
 
-	if document.Parameters == nil {
+	if document.Components == nil && document.Components.Parameters != nil {
 		return problems, nil
 	}
 
-	parameterCache, array, err := doLintParameterSection(document, schemaCache)
+	array, err = doLintParameterSection(document)
 
 	if err != nil {
 		return nil, err
@@ -146,7 +143,7 @@ func doLintObject(ctx internal.ProjectContext) ([]Violation, error) {
 
 	problems = append(problems, array...)
 
-	exitCache, array, err := doLintExitSection(document)
+	array, err = doLintExitSection(document)
 
 	if err != nil {
 		return nil, err
@@ -154,7 +151,7 @@ func doLintObject(ctx internal.ProjectContext) ([]Violation, error) {
 
 	problems = append(problems, array...)
 
-	array, err = doLintCommandSection(document, parameterCache, exitCache, schemaCache)
+	array, err = doLintCommandSection(document)
 
 	if err != nil {
 		return nil, err

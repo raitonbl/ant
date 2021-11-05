@@ -23,4 +23,5 @@ const (
 	NOT_AVAILABLE_IN_USE                        = "not available since the value has been defined"
 	ARGS_INDEX_NOT_ORDERED                      = "arguments index must start in zero(0) and be sequential"
 	ARGS_INDEX_NOT_UNIQUE                       = "arguments index must be unique"
+	NOT_ONE_OF                                  = "did not match any of the specified OneOf schemas"
 )

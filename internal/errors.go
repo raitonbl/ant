@@ -1,6 +1,9 @@
 package internal
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/raitonbl/ant/internal/commands/lint"
+)
 
 var factory *ProblemFactory
 
@@ -50,6 +53,23 @@ func (instance *ProblemFactory) GetMissingExit(name string) error {
 
 func (instance *ProblemFactory) GetMissingParameter(name string) error {
 	return &Problem{Code: 101, Message: fmt.Sprintf("missing parameters[\"id\":\"%s\"]", name)}
+}
+
+func (instance *ProblemFactory) GetUnsupportedLanguage(projectType string, projectLang string) error {
+	return &Problem{Code: 103, Message: fmt.Sprintf("language \"%s\" isn't supported for project of type \"%s\"", projectLang, projectType)}
+}
+
+func (instance *ProblemFactory) GetValidationConstraintViolation(problems []lint.Violation) error {
+	txt := ""
+	for index, each := range problems {
+		txt += fmt.Sprintf("%d.path:%s\n message:%s", index, each.Path, each.Message)
+	}
+
+	return &Problem{Code: 104, Message: txt}
+}
+
+func (instance *ProblemFactory) NotImplemented() error {
+	return instance.GetUnexpectedContext()
 }
 
 type Problem struct {

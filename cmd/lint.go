@@ -33,13 +33,7 @@ func doLint(args map[string]commando.ArgValue, _ map[string]commando.FlagValue) 
 	}
 
 	if problems != nil && len(problems) > 0 {
-
-		txt := ""
-		for index, each := range problems {
-			txt += fmt.Sprintf("%d.path:%s\n message:%s", index, each.Path, each.Message)
-		}
-
-		fmt.Println(txt)
+		fmt.Println(internal.GetProblemFactory().GetValidationConstraintViolation(problems).Error())
 		fmt.Println("Document isn't valid")
 		os.Exit(2)
 	}

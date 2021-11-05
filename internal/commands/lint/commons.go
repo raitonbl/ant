@@ -20,7 +20,6 @@ const (
 type LintContext struct {
 	prefix   string
 	document *project.CliObject
-	schemas  map[string]*project.Schema
 }
 
 func doLintSchema(ctx *LintContext, schema *project.Schema) []Violation {
@@ -67,7 +66,11 @@ func doLintSchemaRefersTo(ctx *LintContext, schema *project.Schema) ([]Violation
 		return []Violation{{Path: fmt.Sprintf("%s/type", ctx.prefix), Message: lint_message.REQUIRED_FIELD}}, true
 	} else if schema.TypeOf == nil && schema.RefersTo != nil {
 
-		fromCache := ctx.schemas[*schema.RefersTo]
+		var fromCache *project.Schema = nil
+
+		if ctx.document != nil && ctx.document.Components != nil && ctx.document.Components.Schemas != nil {
+			fromCache = ctx.document.Components.Schemas[*schema.RefersTo]
+		}
 
 		if fromCache == nil {
 			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
@@ -201,7 +204,7 @@ func doLintArraySchema(ctx *LintContext, schema *project.Schema, typeOf project.
 	}
 
 	if schema.Items != nil {
-		copyOf := &LintContext{prefix: ctx.prefix + "/items", schemas: ctx.schemas}
+		copyOf := &LintContext{document: ctx.document, prefix: ctx.prefix + "/items"}
 		problems = append(problems, doLintSchema(copyOf, schema.Items)...)
 	}
 
@@ -247,12 +250,15 @@ func doLintArraySchemaLength(ctx *LintContext, schema *project.Schema, typeOf pr
 
 func doLintParameter(ctx *LintContext, parameter *project.ParameterObject) ([]Violation, error) {
 
-	schema := parameter.Schema
+	var schema = parameter.Schema
 	problems := make([]Violation, 0)
 	problems = append(problems, doLintParameterFields(ctx, parameter)...)
 
 	if parameter.Schema != nil && parameter.Schema.RefersTo != nil {
-		schema = ctx.schemas[*parameter.Schema.RefersTo]
+
+		if ctx.document.Components != nil && ctx.document.Components.Schemas != nil {
+			schema = ctx.document.Components.Schemas[*parameter.Schema.RefersTo]
+		}
 
 		if schema == nil {
 			problems = append(problems, Violation{Path: fmt.Sprintf("%s/schema/refers-to", ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
@@ -319,7 +325,7 @@ func doLintParameterSchema(ctx *LintContext, parameter *project.ParameterObject)
 	}
 
 	if parameter.Schema != nil {
-		context := LintContext{prefix: fmt.Sprintf("%s/schema", ctx.prefix), schemas: ctx.schemas}
+		context := LintContext{document: ctx.document, prefix: fmt.Sprintf("%s/schema", ctx.prefix)}
 		problems = append(problems, doLintSchema(&context, parameter.Schema)...)
 	}
 

@@ -51,40 +51,40 @@
     }
   ],
   "description": "application that allows an CLI to be built or to build test starting from a specification",
-  "parameters": [
-    {
-      "id": "filename",
-      "in": "arguments",
-      "index": 0,
-      "name": "filename",
-      "description": "indicates the specification.yaml which will be ingested",
-      "schema": {
-        "type": "string"
+  "components": {
+    "exits": {
+      "file-not-found": {
+        "code": 2,
+        "message": "Input file not found"
       }
     },
-    {
-      "id": "stack",
-      "in": "flags",
-      "name": "stack",
-      "description": "indicates the programming language which is used to generate the project",
-      "schema": {
-        "enum": [
-          "java",
-          "python3",
-          "golang"
-        ],
-        "type": "string",
-        "examples": [
-          "java"
-        ]
+    "schemas": {},
+    "parameters": {
+      "filename": {
+        "in": "arguments",
+        "index": 0,
+        "name": "filename",
+        "description": "indicates the specification.yaml which will be ingested",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "stack": {
+        "in": "flags",
+        "name": "stack",
+        "description": "indicates the programming language which is used to generate the project",
+        "schema": {
+          "enum": [
+            "java",
+            "python3",
+            "golang"
+          ],
+          "type": "string",
+          "examples": [
+            "java"
+          ]
+        }
       }
     }
-  ],
-  "exit": [
-    {
-      "code": 2,
-      "id": "file-not-found",
-      "message": "Input file not found"
-    }
-  ]
+  }
 }

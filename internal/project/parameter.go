@@ -8,7 +8,6 @@ const (
 )
 
 type ParameterObject struct {
-	Id           *string `yaml:"id" json:"id,omitempty"`
 	In           *In     `yaml:"in" json:"in,omitempty"`
 	Index        *int    `yaml:"index" json:"index,omitempty"`
 	Required     *bool   `yaml:"required" json:"required,omitempty"`
@@ -22,10 +21,6 @@ type ParameterObject struct {
 
 func (instance *ParameterObject) Clone() *ParameterObject {
 	object := ParameterObject{}
-
-	if instance.Id != nil {
-		object.Id = instance.Id
-	}
 
 	if instance.In != nil {
 		object.In = instance.In

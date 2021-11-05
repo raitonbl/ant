@@ -7,6 +7,16 @@ import (
 	"strings"
 )
 
+type ProjectType string
+type LanguageType string
+
+const (
+	TestsType       ProjectType  = "tests"
+	ApplicationType ProjectType  = "application"
+	GoLang          LanguageType = "golang"
+	Python3         LanguageType = "python3"
+)
+
 type ProjectContext interface {
 	GetProjectFile() *File
 	GetDocument() (*project.CliObject, error)
@@ -23,9 +33,12 @@ func GetContext(filename string) (ProjectContext, error) {
 }
 
 type DefaultContext struct {
-	projectFile       *File
-	processedDocument *project.CliObject
-	document          *project.CliObject
+	projectFile           *File
+	processedDocument     *project.CliObject
+	document              *project.CliObject
+	targetProjectLocation string
+	targetProjectLanguage LanguageType
+	targetProjectType     ProjectType
 }
 
 func (instance *DefaultContext) GetProjectFile() *File {
@@ -87,4 +100,51 @@ func parseJson(binary []byte) (*project.CliObject, error) {
 	}
 
 	return &descriptor, err
+}
+
+type GenerateProjectContext interface {
+	GetProjectFile() *File
+	GetDocument() (*project.CliObject, error)
+	GetTargetProjectType() ProjectType
+	GetTargetProjectLocation() string
+	GetProjectTargetLanguage() LanguageType
+}
+
+func (instance *DefaultContext) GetTargetProjectType() ProjectType {
+	return instance.targetProjectType
+}
+
+func (instance *DefaultContext) GetTargetProjectLocation() string {
+	return instance.targetProjectLocation
+}
+
+func (instance *DefaultContext) GetProjectTargetLanguage() LanguageType {
+	return instance.targetProjectLanguage
+}
+
+func GetGenerateProjectContext(filename string, targetDirectory string, targetType ProjectType, targetLanguage LanguageType) (GenerateProjectContext, error) {
+	file, err := GetFile(filename)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !isLangSupported(targetType, targetLanguage) {
+		return nil, GetProblemFactory().GetUnsupportedLanguage(string(targetType), string(targetLanguage))
+	}
+
+	return &DefaultContext{projectFile: file, targetProjectLanguage: targetLanguage, targetProjectLocation: targetDirectory, targetProjectType: targetType}, nil
+}
+
+func isLangSupported(projectType ProjectType, projectLanguage LanguageType) bool {
+
+	if projectType == ApplicationType && projectLanguage == GoLang {
+		return true
+	}
+
+	if projectType == TestsType && projectLanguage == Python3 {
+		return true
+	}
+
+	return false
 }

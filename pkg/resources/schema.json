@@ -21,42 +21,30 @@
       "type": "string",
       "description": "The summary of the CLI application intent"
     },
-    "parameters": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/parameter"
-      }
-    },
-    "exit": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
+    "components": {
+      "type": "object",
+      "properties": {
+        "schemas": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/schema"
           },
-          "code": {
-            "type": "integer"
-          },
-          "message": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          }
+          "description": "One or more JSON objects describing the schemas being consumed and produced by the CLI."
         },
-        "additionalProperties": false,
-        "required": [
-          "id",
-          "code",
-          "message"
-        ]
-      }
-    },
-    "schemas": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/schema-definition"
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/parameter"
+          },
+          "description": "One or more JSON representations for parameters"
+        },
+        "exits": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/exit"
+          },
+          "description": "One or more JSON representations for exit"
+        }
       }
     }
   },
@@ -133,7 +121,11 @@
           "type": "string",
           "description": "the exit summary of the intent"
         }
-      }
+      },
+      "required": [
+        "code",
+        "message"
+      ]
     },
     "command": {
       "type": "object",
@@ -185,6 +177,7 @@
               },
               {
                 "type": "object",
+                "additionalProperties": false,
                 "properties": {
                   "refers-to": {
                     "type": "string"

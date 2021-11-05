@@ -7,7 +7,7 @@ import (
 	"github.com/raitonbl/ant/internal/utils"
 )
 
-func doLintCommandSection(document *project.CliObject, parameterCache map[string]*project.ParameterObject, exitCache map[string]*project.ExitObject, schemas map[string]*project.Schema) ([]Violation, error) {
+func doLintCommandSection(document *project.CliObject) ([]Violation, error) {
 	problems := make([]Violation, 0)
 	cache := make(map[string]*project.CommandObject)
 
@@ -16,7 +16,7 @@ func doLintCommandSection(document *project.CliObject, parameterCache map[string
 	}
 
 	for index, command := range document.Subcommands {
-		ctx := &CommandLintingContext{path: fmt.Sprintf("/commands/%d", index), parameterCache: parameterCache, exitCache: exitCache, schemaCache: schemas, commandCache: cache}
+		ctx := &CommandLintingContext{path: fmt.Sprintf("/commands/%d", index), commandCache: cache}
 
 		v, prob := doLintCommand(ctx, &command, document)
 
@@ -32,9 +32,9 @@ func doLintCommandSection(document *project.CliObject, parameterCache map[string
 
 func doLintCommand(commandContext *CommandLintingContext, instance *project.CommandObject, document *project.CliObject) ([]Violation, error) {
 
-	cache := commandContext.commandCache
 	prefix := commandContext.path
 	problems := make([]Violation, 0)
+	cache := commandContext.commandCache
 
 	if instance.Id != nil && utils.IsBlank(*instance.Id) {
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", prefix), Message: lint_message.BLANK_FIELD})
@@ -79,8 +79,8 @@ func doLintCommand(commandContext *CommandLintingContext, instance *project.Comm
 
 func doLintCommandConfiguration(commandContext *CommandLintingContext, instance *project.CommandObject, document *project.CliObject) ([]Violation, error) {
 
-	cache := commandContext.commandCache
 	problems := make([]Violation, 0)
+	cache := commandContext.commandCache
 
 	array, err := doLintCommandExitSection(commandContext, document, instance)
 
@@ -114,16 +114,13 @@ func doLintCommandConfiguration(commandContext *CommandLintingContext, instance 
 func doLintSubcommands(commandContext *CommandLintingContext, document *project.CliObject, instance *project.CommandObject) ([]Violation, error) {
 	cache := commandContext.commandCache
 	prefix := commandContext.path
-	exitCache := commandContext.exitCache
-	schemaCache := commandContext.schemaCache
-	parameterCache := commandContext.parameterCache
 
 	problems := make([]Violation, 0)
 
 	if instance.Subcommands != nil {
 		for index, command := range instance.Subcommands {
 			path := fmt.Sprintf("%s/commands/%d", prefix, index)
-			ctx := &CommandLintingContext{path: path, parameterCache: parameterCache, exitCache: exitCache, schemaCache: schemaCache, commandCache: cache}
+			ctx := &CommandLintingContext{path: path, commandCache: cache}
 			array, err := doLintCommand(ctx, command, document)
 
 			if err != nil {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/raitonbl/ant/internal/commands/lint/lint_message"
 	"github.com/raitonbl/ant/internal/project"
-	"github.com/raitonbl/ant/internal/utils"
 	"github.com/thoas/go-funk"
 	"sort"
 )
@@ -15,41 +14,28 @@ type CommandCacheContext struct {
 	shortForms map[string]*project.ParameterObject
 }
 
-func doLintParameterSection(document *project.CliObject, schemaCache map[string]*project.Schema) (map[string]*project.ParameterObject, []Violation, error) {
+func doLintParameterSection(document *project.CliObject) ([]Violation, error) {
 	problems := make([]Violation, 0)
-	cache := make(map[string]*project.ParameterObject)
 
-	if document.Parameters == nil {
-		return cache, problems, nil
+	if document.Components == nil && document.Components.Parameters == nil {
+		return problems, nil
 	}
 
-	for index, parameter := range document.Parameters {
+	for key, parameter := range document.Components.Parameters {
 
-		ctx := &LintContext{prefix: fmt.Sprintf("/parameters/%d", index), document: document, schemas: schemaCache}
+		ctx := &LintContext{prefix: fmt.Sprintf("/components/parameters/%s", key), document: document}
 
-		if parameter.Id == nil || utils.IsBlank(*parameter.Id) {
-			problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: lint_message.REQUIRED_FIELD})
-		}
-
-		if cache[*parameter.Id] != nil {
-			problems = append(problems, Violation{Path: fmt.Sprintf("%s/id", ctx.prefix), Message: lint_message.DUPLICATED_FIELD_VALUE})
-		}
-
-		array, prob := doLintParameter(ctx, &parameter)
+		array, prob := doLintParameter(ctx, parameter)
 
 		if prob != nil {
-			return nil, nil, prob
+			return nil, prob
 		}
 
 		problems = append(problems, array...)
 
-		param := parameter
-
-		cache[*parameter.Id] = &param
-
 	}
 
-	return cache, problems, nil
+	return problems, nil
 }
 
 func doLintCommandParameterSection(commandContext *CommandLintingContext, document *project.CliObject, instance *project.CommandObject) ([]Violation, error) {
@@ -80,19 +66,18 @@ func doLintCommandParameters(commandContext *CommandLintingContext, instance *pr
 	cacheContext := &CommandCacheContext{args: args, flags: flags, shortForms: shortForms}
 
 	for index, each := range instance.Parameters {
-		ctx := &LintContext{prefix: fmt.Sprintf("%s/parameters/%d", prefix, index), document: document, schemas: commandContext.schemaCache}
+		ctx := &LintContext{prefix: fmt.Sprintf("%s/parameters/%d", prefix, index), document: document}
 		array, err := doLintCommandParameter(commandContext, ctx, cacheContext, &each)
 
 		if err != nil {
 			return nil, err
 		}
 
-
 		problems = append(problems, array...)
 
 	}
 
-	ctx := &LintContext{prefix: fmt.Sprintf("%s/parameters", prefix), document: document, schemas: commandContext.schemaCache}
+	ctx := &LintContext{prefix: fmt.Sprintf("%s/parameters", prefix), document: document}
 	problems = append(problems, doLintCommandParameterInArguments(ctx, args)...)
 
 	return problems, nil
@@ -117,8 +102,8 @@ func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintCont
 		problems = append(problems, Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.NOT_AVAILABLE_IN_USE})
 	}
 
-	if param.In != nil && *param.In == project.Arguments {
-		args[*param.Id] = param
+	if param.In != nil && *param.In == project.Arguments && param.Name!=nil {
+		args[*param.Name] = param //TODO FIX ID CHANGED INTO NAME
 	}
 
 	if param.In == nil || *param.In == project.Flags {
@@ -139,17 +124,20 @@ func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintCont
 }
 
 func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *LintContext, each project.ParameterObject) ([]Violation, bool, *project.ParameterObject) {
-	param := &each
+	var param = &each
 	skipLintParameter := false
 	problems := make([]Violation, 0)
 	isReference := isParameterReference(param)
-	parameterCache := commandContext.parameterCache
 
 	if each.RefersTo != nil && !isReference {
 		param = nil
 		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
 	} else if each.RefersTo != nil && isReference {
-		param = parameterCache[*each.RefersTo]
+		param = nil
+
+		if ctx.document.Components != nil && ctx.document.Components.Parameters != nil {
+			param = ctx.document.Components.Parameters[*each.RefersTo]
+		}
 
 		if param == nil {
 			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
@@ -220,10 +208,6 @@ func doLintCommandParameterInArguments(ctx *LintContext, args map[string]*projec
 }
 
 func isParameterReference(each *project.ParameterObject) bool {
-
-	if each.Id != nil {
-		return false
-	}
 
 	if each.Description != nil {
 		return false
