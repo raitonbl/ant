@@ -2,12 +2,13 @@ package lint
 
 import (
 	"fmt"
+	"github.com/raitonbl/ant/internal"
 	"github.com/raitonbl/ant/internal/commands/lint/lint_message"
 	"github.com/raitonbl/ant/internal/project"
 )
 
-func doLintExitSection(document *project.CliObject) ([]Violation, error) {
-	problems := make([]Violation, 0)
+func doLintExitSection(document *project.CliObject) ([]internal.Violation, error) {
+	problems := make([]internal.Violation, 0)
 
 	if document.Components == nil && document.Components.Exits == nil {
 		return problems, nil
@@ -30,9 +31,9 @@ func doLintExitSection(document *project.CliObject) ([]Violation, error) {
 	return problems, nil
 }
 
-func doLintCommandExitSection(commandContext *CommandLintingContext, document *project.CliObject, instance *project.CommandObject) ([]Violation, error) {
+func doLintCommandExitSection(commandContext *CommandLintingContext, document *project.CliObject, instance *project.CommandObject) ([]internal.Violation, error) {
 
-	problems := make([]Violation, 0)
+	problems := make([]internal.Violation, 0)
 
 	if instance.Exit != nil {
 		for index, each := range instance.Exit {
@@ -49,16 +50,16 @@ func doLintCommandExitSection(commandContext *CommandLintingContext, document *p
 	return problems, nil
 }
 
-func doLintCommandExit(commandContext *CommandLintingContext, document *project.CliObject, index int, each project.ExitObject) ([]Violation, error) {
+func doLintCommandExit(commandContext *CommandLintingContext, document *project.CliObject, index int, each project.ExitObject) ([]internal.Violation, error) {
 
 	exit := &each
 	prefix := commandContext.path
-	problems := make([]Violation, 0)
+	problems := make([]internal.Violation, 0)
 	isReference := isExitReference(&each)
 	ctx := &LintContext{prefix: fmt.Sprintf("%s/exit/%d", prefix, index), document: document}
 
 	if each.RefersTo != nil && !isReference {
-		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
+		problems = append(problems, internal.Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
 	} else if each.RefersTo != nil && isReference {
 
 		if document.Components != nil && document.Components.Exits != nil  {
@@ -66,7 +67,7 @@ func doLintCommandExit(commandContext *CommandLintingContext, document *project.
 		}
 
 		if exit == nil {
-			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
+			problems = append(problems, internal.Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
 		}
 
 		return problems, nil

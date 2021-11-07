@@ -2,9 +2,10 @@ package lint
 
 import (
 	"fmt"
+	"github.com/raitonbl/ant/internal"
 )
 
-func toString(each *Violation) string {
+func toString(each *internal.Violation) string {
 
 	if each == nil {
 		return "nil"
@@ -13,7 +14,7 @@ func toString(each *Violation) string {
 	return fmt.Sprintf("{\"path\":\"%s\" , \"message\":\"%s\"}", each.Path, each.Message)
 }
 
-func toText(array []Violation) string {
+func toText(array []internal.Violation) string {
 
 	if array == nil || len(array) == 0 {
 		return "[]"

@@ -11,17 +11,12 @@ import (
 	"strings"
 )
 
-type Violation struct {
-	Path    string
-	Message string
-}
-
 type CommandLintingContext struct {
 	path         string
 	commandCache map[string]*project.CommandObject
 }
 
-func Lint(context internal.ProjectContext) ([]Violation, error) {
+func Lint(context internal.ProjectContext) ([]internal.Violation, error) {
 
 	if context == nil {
 		return nil, internal.GetProblemFactory().GetUnexpectedContext()
@@ -40,10 +35,10 @@ func Lint(context internal.ProjectContext) ([]Violation, error) {
 	return problems, nil
 }
 
-func doLint(context internal.ProjectContext) ([]Violation, error) {
+func doLint(context internal.ProjectContext) ([]internal.Violation, error) {
 
 	binary := make([]byte, 0)
-	problems := make([]Violation, 0)
+	problems := make([]internal.Violation, 0)
 
 	if strings.HasSuffix(context.GetProjectFile().GetName(), ".json") {
 		binary = context.GetProjectFile().GetContent()
@@ -79,7 +74,7 @@ func doLint(context internal.ProjectContext) ([]Violation, error) {
 	return append(problems, array...), nil
 }
 
-func doLintFile(binary []byte) ([]Violation, error) {
+func doLintFile(binary []byte) ([]internal.Violation, error) {
 	goContext := context.Background()
 
 	schema, err := resources.GetResource("schema.json")
@@ -100,16 +95,16 @@ func doLintFile(binary []byte) ([]Violation, error) {
 		return nil, internal.GetProblemFactory().GetProblem(err)
 	}
 
-	problems := make([]Violation, len(errs))
+	problems := make([]internal.Violation, len(errs))
 
 	for index, each := range errs {
-		problems[index] = Violation{Path: each.PropertyPath, Message: each.Message}
+		problems[index] = internal.Violation{Path: each.PropertyPath, Message: each.Message}
 	}
 
 	return problems, nil
 }
 
-func doLintObject(ctx internal.ProjectContext) ([]Violation, error) {
+func doLintObject(ctx internal.ProjectContext) ([]internal.Violation, error) {
 
 	document, err := ctx.GetDocument()
 
@@ -121,7 +116,7 @@ func doLintObject(ctx internal.ProjectContext) ([]Violation, error) {
 		return nil, internal.GetProblemFactory().GetUnexpectedState()
 	}
 
-	problems := make([]Violation, 0)
+	problems := make([]internal.Violation, 0)
 
 	array, err := doLintSchemaSection(document)
 

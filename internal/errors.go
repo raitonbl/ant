@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"github.com/raitonbl/ant/internal/commands/lint"
 )
 
 var factory *ProblemFactory
@@ -59,7 +58,7 @@ func (instance *ProblemFactory) GetUnsupportedLanguage(projectType string, proje
 	return &Problem{Code: 103, Message: fmt.Sprintf("language \"%s\" isn't supported for project of type \"%s\"", projectLang, projectType)}
 }
 
-func (instance *ProblemFactory) GetValidationConstraintViolation(problems []lint.Violation) error {
+func (instance *ProblemFactory) GetValidationConstraintViolation(problems []Violation) error {
 	txt := ""
 	for index, each := range problems {
 		txt += fmt.Sprintf("%d.path:%s\n message:%s", index, each.Path, each.Message)
@@ -79,4 +78,9 @@ type Problem struct {
 
 func (instance *Problem) Error() string {
 	return instance.Message
+}
+
+type Violation struct {
+	Path    string
+	Message string
 }

@@ -2,6 +2,7 @@ package lint
 
 import (
 	"fmt"
+	"github.com/raitonbl/ant/internal"
 	"github.com/raitonbl/ant/internal/commands/lint/lint_message"
 	"github.com/raitonbl/ant/internal/project"
 	"github.com/thoas/go-funk"
@@ -14,8 +15,8 @@ type CommandCacheContext struct {
 	shortForms map[string]*project.ParameterObject
 }
 
-func doLintParameterSection(document *project.CliObject) ([]Violation, error) {
-	problems := make([]Violation, 0)
+func doLintParameterSection(document *project.CliObject) ([]internal.Violation, error) {
+	problems := make([]internal.Violation, 0)
 
 	if document.Components == nil && document.Components.Parameters == nil {
 		return problems, nil
@@ -38,10 +39,10 @@ func doLintParameterSection(document *project.CliObject) ([]Violation, error) {
 	return problems, nil
 }
 
-func doLintCommandParameterSection(commandContext *CommandLintingContext, document *project.CliObject, instance *project.CommandObject) ([]Violation, error) {
+func doLintCommandParameterSection(commandContext *CommandLintingContext, document *project.CliObject, instance *project.CommandObject) ([]internal.Violation, error) {
 
 	prefix := commandContext.path
-	problems := make([]Violation, 0)
+	problems := make([]internal.Violation, 0)
 
 	if instance.Parameters != nil {
 
@@ -57,9 +58,9 @@ func doLintCommandParameterSection(commandContext *CommandLintingContext, docume
 	return problems, nil
 }
 
-func doLintCommandParameters(commandContext *CommandLintingContext, instance *project.CommandObject, prefix string, document *project.CliObject) ([]Violation, error) {
+func doLintCommandParameters(commandContext *CommandLintingContext, instance *project.CommandObject, prefix string, document *project.CliObject) ([]internal.Violation, error) {
 
-	problems := make([]Violation, 0)
+	problems := make([]internal.Violation, 0)
 	args := make(map[string]*project.ParameterObject)
 	flags := make(map[string]*project.ParameterObject)
 	shortForms := make(map[string]*project.ParameterObject)
@@ -83,13 +84,13 @@ func doLintCommandParameters(commandContext *CommandLintingContext, instance *pr
 	return problems, nil
 }
 
-func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintContext, cacheContext *CommandCacheContext, each *project.ParameterObject) ([]Violation, error) {
+func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintContext, cacheContext *CommandCacheContext, each *project.ParameterObject) ([]internal.Violation, error) {
 	args := cacheContext.args
 	flags := cacheContext.flags
 	shortForms := cacheContext.shortForms
 
 	param := each
-	problems := make([]Violation, 0)
+	problems := make([]internal.Violation, 0)
 	array, skipLintParameter, param := doLintCommandParameterRefersTo(commandContext, ctx, *each)
 
 	problems = append(problems, array...)
@@ -99,7 +100,7 @@ func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintCont
 	}
 
 	if param.In != nil && *param.In == project.Arguments && param.Name != nil && args[*param.Name] != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.NOT_AVAILABLE_IN_USE})
+		problems = append(problems, internal.Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.NOT_AVAILABLE_IN_USE})
 	}
 
 	if param.In != nil && *param.In == project.Arguments && param.Name!=nil {
@@ -123,15 +124,15 @@ func doLintCommandParameter(commandContext *CommandLintingContext, ctx *LintCont
 	return append(problems, array...), nil
 }
 
-func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *LintContext, each project.ParameterObject) ([]Violation, bool, *project.ParameterObject) {
+func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *LintContext, each project.ParameterObject) ([]internal.Violation, bool, *project.ParameterObject) {
 	var param = &each
 	skipLintParameter := false
-	problems := make([]Violation, 0)
+	problems := make([]internal.Violation, 0)
 	isReference := isParameterReference(param)
 
 	if each.RefersTo != nil && !isReference {
 		param = nil
-		problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
+		problems = append(problems, internal.Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
 	} else if each.RefersTo != nil && isReference {
 		param = nil
 
@@ -140,10 +141,10 @@ func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *
 		}
 
 		if param == nil {
-			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
+			problems = append(problems, internal.Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.UNRESOLVABLE_FIELD})
 			param = nil
 		} else if (param.In == nil || *param.In == project.Flags) && each.Index != nil {
-			problems = append(problems, Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
+			problems = append(problems, internal.Violation{Path: fmt.Sprintf(refers_to_format_pattern, ctx.prefix), Message: lint_message.FIELD_NOT_ALLOWED})
 			param = nil
 		} else if param.In != nil && *param.In == project.Arguments && each.Index != nil {
 			param = param.Clone()
@@ -161,17 +162,17 @@ func doLintCommandParameterRefersTo(commandContext *CommandLintingContext, ctx *
 	return problems, skipLintParameter, param
 }
 
-func doLintCommandParameterInFlags(ctx *LintContext, param *project.ParameterObject, flags map[string]*project.ParameterObject, shortForms map[string]*project.ParameterObject) []Violation {
-	problems := make([]Violation, 0)
+func doLintCommandParameterInFlags(ctx *LintContext, param *project.ParameterObject, flags map[string]*project.ParameterObject, shortForms map[string]*project.ParameterObject) []internal.Violation {
+	problems := make([]internal.Violation, 0)
 
 	if param.Name != nil && flags[*param.Name] != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf(name_format_pattern, ctx.prefix), Message: lint_message.NOT_AVAILABLE_IN_USE})
+		problems = append(problems, internal.Violation{Path: fmt.Sprintf(name_format_pattern, ctx.prefix), Message: lint_message.NOT_AVAILABLE_IN_USE})
 	} else if param.Name != nil {
 		flags[*param.Name] = param
 	}
 
 	if param.ShortForm != nil && shortForms[*param.ShortForm] != nil {
-		problems = append(problems, Violation{Path: fmt.Sprintf("%s/short-form", ctx.prefix), Message: lint_message.DUPLICATED_FIELD_VALUE})
+		problems = append(problems, internal.Violation{Path: fmt.Sprintf("%s/short-form", ctx.prefix), Message: lint_message.DUPLICATED_FIELD_VALUE})
 	} else if param.ShortForm != nil {
 		shortForms[*param.ShortForm] = param
 	}
@@ -179,8 +180,8 @@ func doLintCommandParameterInFlags(ctx *LintContext, param *project.ParameterObj
 	return problems
 }
 
-func doLintCommandParameterInArguments(ctx *LintContext, args map[string]*project.ParameterObject) []Violation {
-	problems := make([]Violation, 0)
+func doLintCommandParameterInArguments(ctx *LintContext, args map[string]*project.ParameterObject) []internal.Violation {
+	problems := make([]internal.Violation, 0)
 	seq := make([]*project.ParameterObject, 0)
 
 	for _, value := range args {
@@ -196,9 +197,9 @@ func doLintCommandParameterInArguments(ctx *LintContext, args map[string]*projec
 	for _, each := range seq {
 
 		if len(indexes) == 0 && *each.Index != 0 {
-			problems = append(problems, Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.ARGS_INDEX_NOT_ORDERED})
+			problems = append(problems, internal.Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.ARGS_INDEX_NOT_ORDERED})
 		} else if funk.Contains(indexes, *each.Index) {
-			problems = append(problems, Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.ARGS_INDEX_NOT_UNIQUE})
+			problems = append(problems, internal.Violation{Path: fmt.Sprintf("%s", ctx.prefix), Message: lint_message.ARGS_INDEX_NOT_UNIQUE})
 		}
 
 		indexes = append(indexes, *each.Index)
