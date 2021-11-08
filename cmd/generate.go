@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/magiconair/properties"
 	"github.com/raitonbl/ant/internal"
 	"github.com/raitonbl/ant/internal/commands/generate"
 	"github.com/thatisuday/commando"
@@ -12,6 +13,7 @@ func AddGenerateProjectCommand(registry *commando.CommandRegistry) *commando.Com
 	return registry.Register("generate").
 		SetShortDescription("generates a project from a specification file").
 		SetDescription("allows the generate a project from a CLI specification file").
+		AddFlag("properties", "the uri for a property file containing properties that will be used in project generation", commando.String, "").
 		AddArgument("type", "the type of project, it might be application for CLI project or tests for integration tests project", "application").
 		AddArgument("language", "the type of project, it might be application for CLI project or tests for integration tests project", "golang").
 		AddArgument("file", "the CLI specification file URI", "index.json").
@@ -21,6 +23,7 @@ func AddGenerateProjectCommand(registry *commando.CommandRegistry) *commando.Com
 
 func doGenerateCLIProject(args map[string]commando.ArgValue, flags map[string]commando.FlagValue) {
 	uri := args["file"].Value
+	propertiesURI := flags["properties"].Value
 	projectDirectory := args["directory"].Value
 	projectType := parseType(args["type"].Value)
 	projectLanguage := parseLanguage(args["language"].Value)
@@ -35,18 +38,32 @@ func doGenerateCLIProject(args map[string]commando.ArgValue, flags map[string]co
 		os.Exit(1)
 	}
 
-	ctx, err := internal.GetGenerateProjectContext(uri, projectDirectory, *projectType, *projectLanguage)
+	var props *properties.Properties = nil
+
+	if propertiesURI != "" {
+
+		config, err := internal.GetProperties(propertiesURI.(string))
+
+		if err != nil {
+			exit(err.(*internal.Problem))
+		}
+
+		props = config
+	}
+
+	factory := internal.ContextFactory{}
+	ctx, err := factory.SetFilename(uri).SetProjectLanguage(*projectLanguage).SetProjectType(*projectType).
+		SetProjectDestination(projectDirectory).SetProperties(props).
+		GetGenerateContext()
 
 	if err != nil {
-		fmt.Println(err.(*internal.Problem).Message)
-		os.Exit(err.(*internal.Problem).Code)
+		exit(err.(*internal.Problem))
 	}
 
 	path, err := generate.Generate(ctx)
 
 	if err != nil {
-		fmt.Println(err.(*internal.Problem).Message)
-		os.Exit(err.(*internal.Problem).Code)
+		exit(err.(*internal.Problem))
 	}
 
 	fmt.Println(fmt.Sprintf("Project has been generated in %s", path))

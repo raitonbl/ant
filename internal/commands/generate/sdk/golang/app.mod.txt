@@ -1,0 +1,9 @@
+module ${module}
+
+go ${version}
+
+replace ${module} => ./
+
+require (
+	github.com/thatisuday/commando v1.0.4
+)

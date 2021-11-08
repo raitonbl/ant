@@ -261,8 +261,8 @@ func doLintTest(t *testing.T, filename string, seq ...internal.Violation) {
 }
 
 func doLintFrom(t *testing.T, filename string, afterLint func(array []internal.Violation)) {
-
-	ctx, err := internal.GetContext(fmt.Sprintf("testdata/%s", filename))
+	factory := internal.ContextFactory{}
+	ctx, err := factory.SetFilename(fmt.Sprintf("testdata/%s", filename)).GetLintContext()
 
 	if err != nil {
 		t.Fatal(err)

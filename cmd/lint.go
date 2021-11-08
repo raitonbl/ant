@@ -18,7 +18,8 @@ func AddLintCommand(registry *commando.CommandRegistry) *commando.Command {
 
 func doLint(args map[string]commando.ArgValue, _ map[string]commando.FlagValue) {
 	uri := args["file"].Value
-	ctx, err := internal.GetContext(uri)
+	factory := internal.ContextFactory{}
+	ctx, err := factory.SetFilename(uri).GetLintContext()
 
 	if err != nil {
 		fmt.Println(err)

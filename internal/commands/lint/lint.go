@@ -16,7 +16,7 @@ type CommandLintingContext struct {
 	commandCache map[string]*project.CommandObject
 }
 
-func Lint(context internal.ProjectContext) ([]internal.Violation, error) {
+func Lint(context internal.LintContext) ([]internal.Violation, error) {
 
 	if context == nil {
 		return nil, internal.GetProblemFactory().GetUnexpectedContext()
@@ -35,7 +35,7 @@ func Lint(context internal.ProjectContext) ([]internal.Violation, error) {
 	return problems, nil
 }
 
-func doLint(context internal.ProjectContext) ([]internal.Violation, error) {
+func doLint(context internal.LintContext) ([]internal.Violation, error) {
 
 	binary := make([]byte, 0)
 	problems := make([]internal.Violation, 0)
@@ -104,7 +104,7 @@ func doLintFile(binary []byte) ([]internal.Violation, error) {
 	return problems, nil
 }
 
-func doLintObject(ctx internal.ProjectContext) ([]internal.Violation, error) {
+func doLintObject(ctx internal.LintContext) ([]internal.Violation, error) {
 
 	document, err := ctx.GetDocument()
 

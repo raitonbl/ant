@@ -5,7 +5,7 @@ import (
 	"github.com/raitonbl/ant/internal/commands/lint"
 )
 
-func Generate(context internal.GenerateProjectContext) (string, error) {
+func Generate(context internal.GenerateContext) (string, error) {
 
 	if context == nil {
 		return "", internal.GetProblemFactory().GetUnexpectedContext()

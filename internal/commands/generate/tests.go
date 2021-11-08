@@ -1,7 +1,9 @@
 package generate
 
-import "github.com/raitonbl/ant/internal"
+import (
+	"github.com/raitonbl/ant/internal"
+)
 
-func doGenerateTestProject(context internal.GenerateProjectContext) (string, error) {
+func doGenerateTestProject(context internal.GenerateContext) (string, error) {
 	return "", nil
 }

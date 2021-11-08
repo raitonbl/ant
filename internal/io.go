@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/magiconair/properties"
 	"os"
 )
 
@@ -36,4 +37,18 @@ func (instance *File) GetName() string {
 
 func (instance *File) GetContent() []byte {
 	return instance.content
+}
+
+func ReadURI(uri string) ([]byte, error) {
+	return nil, GetProblemFactory().NotImplemented()
+}
+
+func GetProperties(uri string) (*properties.Properties, error) {
+	binary, err := ReadURI(uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return properties.MustLoadString(string(binary)), nil
 }
