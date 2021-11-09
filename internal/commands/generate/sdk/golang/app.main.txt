@@ -1,0 +1,23 @@
+package main
+
+import (
+	"embed"
+	"fmt"
+	"github.com/thatisuday/commando"
+	"os"${import_section}
+)
+
+func main() {
+
+	registry := commando.
+		SetExecutableName("${name}").
+		SetVersion("${version}").
+		SetDescription("${description}")
+
+	registry.Register(nil).SetAction(index)${cmd_section}
+	registry.Parse(nil)
+}
+
+func index(_ map[string]commando.ArgValue, _ map[string]commando.FlagValue) {
+	fmt.Println("${name}\nversion:${version}")
+}

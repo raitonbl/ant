@@ -5,13 +5,9 @@ import (
 	"strings"
 )
 
-func makeGoMode(cliObject *project.CliObject, cfg Configuration, isCli bool) []byte {
-	name := cfg.Name
+func makeGoMode(cliObject *project.CliObject, cfg *Configuration, isCli bool) string {
 	version := cfg.Sdk.version
-
-	if name == "" {
-		name = *cliObject.Name
-	}
+	moduleName :=getModuleName(cliObject,cfg)
 
 	if version == "" {
 		version = "1.16"
@@ -27,8 +23,19 @@ func makeGoMode(cliObject *project.CliObject, cfg Configuration, isCli bool) []b
 
 	content := string(binary)
 
-	content = strings.ReplaceAll(content, "${module}", name)
 	content = strings.ReplaceAll(content, "${version}", version)
+	content = strings.ReplaceAll(content, "${module}", moduleName)
 
-	return []byte(content)
+	return content
+}
+
+func getModuleName(cliObject *project.CliObject, cfg *Configuration) string {
+
+	moduleName := cfg.Module
+
+	if moduleName == "" {
+		moduleName = *cliObject.Name
+	}
+
+	return moduleName
 }

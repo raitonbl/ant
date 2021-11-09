@@ -1,0 +1,23 @@
+package cmd
+
+import (
+	"fmt"
+	"github.com/thatisuday/commando"
+	"os"
+)
+
+func Add${name_in_capital}(registry *commando.CommandRegistry) *commando.Command {
+	return registry.Register("${name}").SetShortDescription("${description}").SetDescription("${description}").${parameters}SetAction(do${name_in_capital})
+}
+
+func do${name_in_capital}(args map[string]commando.ArgValue, flags map[string]commando.FlagValue) {
+	objectType := args["object"].Value
+
+	switch objectType {
+	case "schema":
+		doExportSchema(args, flags)
+	default:
+		fmt.Println(fmt.Sprintf("Fail: Unknown object %s", objectType))
+		os.Exit(1)
+	}
+}

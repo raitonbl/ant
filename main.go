@@ -38,6 +38,7 @@ func main() {
 
 	cmd.AddLintCommand(registry)
 	cmd.AddExportCommand(registry)
+	cmd.AddGenerateProjectCommand(registry)
 
 	registry.Parse(nil)
 }

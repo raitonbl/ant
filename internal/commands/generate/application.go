@@ -2,8 +2,8 @@ package generate
 
 import (
 	"github.com/raitonbl/ant/internal"
-	golang "github.com/raitonbl/ant/internal/commands/generate/sdk/golang"
-	python3 "github.com/raitonbl/ant/internal/commands/generate/sdk/python3"
+	"github.com/raitonbl/ant/internal/commands/generate/sdk/golang"
+	"github.com/raitonbl/ant/internal/commands/generate/sdk/python3"
 )
 
 func doGenerateCLIProject(context internal.GenerateContext) (string, error) {

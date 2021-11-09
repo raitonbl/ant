@@ -159,14 +159,14 @@ func (instance *DefaultContext) Write(filename string, binary []byte) error {
 }
 
 func (instance *DefaultContext) WriteTo(directory []string, filename string, binary []byte) error {
+
 	if instance.directory == nil {
-		directory, err := ioutil.TempDir(fmt.Sprintf("%d", os.Getpid()), "ant-cli")
+		err := os.MkdirAll(instance.GetDirectory(), 0755)
 
 		if err != nil {
 			return GetProblemFactory().GetProblem(err)
 		}
 
-		instance.directory = &directory
 	}
 
 	destination := make([]string, 0)
@@ -176,9 +176,15 @@ func (instance *DefaultContext) WriteTo(directory []string, filename string, bin
 		destination = append(destination, directory...)
 	}
 
+	err := os.MkdirAll(path.Join(destination...), 0755)
+
+	if err != nil {
+		return GetProblemFactory().GetProblem(err)
+	}
+
 	destination = append(destination, filename)
 
-	err := os.WriteFile(path.Join(destination...), binary, 0700)
+	err = ioutil.WriteFile(path.Join(destination...), binary, 0755)
 
 	if err != nil {
 		return GetProblemFactory().GetProblem(err)
@@ -190,12 +196,7 @@ func (instance *DefaultContext) WriteTo(directory []string, filename string, bin
 func (instance *DefaultContext) GetDirectory() string {
 
 	if instance.directory == nil {
-		directory, err := ioutil.TempDir(fmt.Sprintf("%d", os.Getpid()), "ant-cli")
-
-		if err != nil {
-			return path.Join(os.TempDir(), "ant-cli", fmt.Sprintf("%d", os.Getpid()))
-		}
-
+		directory := path.Join(os.TempDir(), "ant-cli", fmt.Sprintf("%d", os.Getpid()))
 		instance.directory = &directory
 	}
 
